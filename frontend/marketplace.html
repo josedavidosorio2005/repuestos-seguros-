@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - MotoSegura</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="MotoSegura - Repuestos Seguros" class="logo-img">
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="verificar.html">Verificar QR</a></li>
+                <li><a href="marketplace.html">Marketplace</a></li>
+                <li><a href="login.html" id="loginLink">Iniciar Sesión</a></li>
+                <li><a href="dashboard.html" id="dashboardLink" class="hidden">Mi Panel</a></li>
+                <li><a href="#" id="logoutLink" class="hidden">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="container" style="margin-top: 120px;">
+        <div class="card">
+            <h2 class="card-header">🛒 Marketplace de Autopartes Verificadas</h2>
+            <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                Compra y vende autopartes con total seguridad y transparencia
+            </p>
+
+            <!-- Filtros de búsqueda -->
+            <div class="grid" style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label for="busqueda">Buscar</label>
+                    <input type="text" id="busqueda" class="form-control" placeholder="Nombre o descripción...">
+                </div>
+                <div class="form-group">
+                    <label for="filtroTipo">Tipo de Parte</label>
+                    <select id="filtroTipo" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="Motor">Motor</option>
+                        <option value="Chasis">Chasis</option>
+                        <option value="Llanta">Llanta</option>
+                        <option value="Escape">Escape</option>
+                        <option value="Faro">Faro</option>
+                        <option value="Espejo">Espejo</option>
+                        <option value="Batería">Batería</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroMarca">Marca</label>
+                    <input type="text" id="filtroMarca" class="form-control" placeholder="Ej: Yamaha, Honda...">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button onclick="buscarAutopartes()" class="btn btn-primary" style="width: 100%;">
+                        Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div id="resultadosContainer"></div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 MotoSegura. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        async function buscarAutopartes() {
+            const busqueda = document.getElementById('busqueda').value;
+            const tipo = document.getElementById('filtroTipo').value;
+            const marca = document.getElementById('filtroMarca').value;
+
+            const params = new URLSearchParams();
+            if (busqueda) params.append('busqueda', busqueda);
+            if (tipo) params.append('tipo', tipo);
+            if (marca) params.append('marca', marca);
+
+            try {
+                showLoading();
+                const response = await apiRequest(`/autopartes/marketplace/disponibles?${params.toString()}`, 'GET');
+                hideLoading();
+
+                mostrarResultados(response.data);
+            } catch (error) {
+                hideLoading();
+                showAlert('Error al buscar autopartes: ' + error.message, 'danger');
+            }
+        }
+
+        function mostrarResultados(autopartes) {
+            const container = document.getElementById('resultadosContainer');
+
+            if (!autopartes || autopartes.length === 0) {
+                container.innerHTML = `
+                    <div class="card">
+                        <p style="color: var(--text-gray); text-align: center; padding: 2rem;">
+                            No se encontraron autopartes disponibles
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="grid">
+                    ${autopartes.map(parte => `
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                                <h3 style="color: var(--primary-color); margin: 0;">${parte.nombre_parte}</h3>
+                                <span class="badge badge-success">${parte.estado}</span>
+                            </div>
+                            <p style="color: var(--text-gray); margin-bottom: 0.5rem;">
+                                <strong>Tipo:</strong> ${parte.tipo_parte}
+                            </p>
+                            <p style="color: var(--text-gray); margin-bottom: 0.5rem;">
+                                <strong>Marca:</strong> ${parte.marca || 'N/A'}
+                            </p>
+                            <p style="color: var(--text-gray); margin-bottom: 0.5rem;">
+                                <strong>Compatible:</strong> ${parte.moto_marca} ${parte.moto_modelo}
+                            </p>
+                            <p style="color: var(--text-gray); margin-bottom: 0.5rem;">
+                                <strong>Vendedor:</strong> ${parte.vendedor_nombre}
+                            </p>
+                            ${parte.descripcion ? `
+                                <p style="color: var(--text-gray); margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                                    ${parte.descripcion}
+                                </p>
+                            ` : ''}
+                            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                                <a href="verificar.html" class="btn btn-secondary" style="flex: 1; text-align: center; padding: 0.5rem;">
+                                    Verificar
+                                </a>
+                                <button onclick="contactarVendedor('${parte.codigo_unico}')" class="btn btn-primary" style="flex: 1;">
+                                    Contactar
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function contactarVendedor(codigo) {
+            showAlert('Funcionalidad de contacto en desarrollo. Código: ' + codigo, 'info');
+        }
+
+        // Cargar autopartes al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            buscarAutopartes();
+        });
+
+        window.buscarAutopartes = buscarAutopartes;
+        window.contactarVendedor = contactarVendedor;
+    </script>
+</body>
+</html>

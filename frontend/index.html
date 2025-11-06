@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoSegura - Protección contra Autopartes Robadas</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="MotoSegura - Repuestos Seguros" class="logo-img">
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="verificar.html">Verificar QR</a></li>
+                <li><a href="marketplace.html">Marketplace</a></li>
+                <li><a href="reportes.html">Reportes</a></li>
+                <li><a href="login.html" id="loginLink">Iniciar Sesión</a></li>
+                <li><a href="dashboard.html" id="dashboardLink" class="hidden">Mi Panel</a></li>
+                <li><a href="#" id="logoutLink" class="hidden">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Comercio de Autopartes Hurtadas de Motocicletas</h1>
+            <p>MotoSegura: Deteniendo el mercado ilegal de autopartes</p>
+            <p class="subtitle">Una solución digital para proteger tu moto y combatir el hurto de autopartes</p>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="register.html" class="btn btn-primary">Registrar mi Moto</a>
+                <a href="verificar.html" class="btn btn-secondary">Verificar Autoparte</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="container">
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 2rem;">
+                🚨 Un Problema que nos Afecta a Todos
+            </h2>
+            <div class="grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Pérdidas Económicas</h3>
+                    <p>El hurto de motocicletas y sus autopartes está en aumento, generando pérdidas económicas y sensación de inseguridad.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🕵️</div>
+                    <h3>Mercado Negro</h3>
+                    <p>Existe un mercado negro en línea y en la calle, donde se venden piezas robadas sin control.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">❓</div>
+                    <h3>Difícil Verificación</h3>
+                    <p>Como dueños de motos, es difícil saber si las autopartes que compramos son legítimas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="container">
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 2rem;">
+                🎯 Nuestra Visión: Seguridad y Transparencia
+            </h2>
+            <div class="grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Visión 01: Ecosistema Seguro</h3>
+                    <p>Queremos crear un ecosistema donde la compra y venta de autopartes de segunda mano sea segura, legal y trazable.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Visión 02: Herramienta de Verificación</h3>
+                    <p>Proporcionar a los usuarios una herramienta para verificar la procedencia de cualquier pieza.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚫</div>
+                    <h3>Visión 03: Eliminar el Robo</h3>
+                    <p>Desincentivar el robo al eliminar el canal de venta ilegal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="container">
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 2rem;">
+                ✅ La Solución: MotoSegura
+            </h2>
+            <div class="grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Aplicación Completa</h3>
+                    <p>Una aplicación móvil o plataforma web que permite a los usuarios registrar sus motocicletas y sus autopartes principales (motor, chasis, etc.).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">QR</div>
+                    <h3>Código de Identificación</h3>
+                    <p>Cada pieza registrada recibe un código de identificación único (ej. un código QR o un código alfanumérico).</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛒</div>
+                    <h3>Mercado Integrado</h3>
+                    <p>Un mercado integrado donde los talleres y dueños de motos pueden vender o comprar autopartes verificadas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="container">
+        <div class="card">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 2rem;">
+                🔄 Un Vistazo al Proceso
+            </h2>
+            <div class="grid">
+                <div class="feature-card">
+                    <div class="feature-icon">01</div>
+                    <h3>Registro</h3>
+                    <p>El dueño registra su moto y sus partes en la app.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">02</div>
+                    <h3>Verificación</h3>
+                    <p>Si alguien compra o encuentra una autoparte, puede escanear el código.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">03</div>
+                    <h3>Resultado</h3>
+                    <p>La app muestra el historial de la pieza: si está reportada como robada, si es legítima, o si no está registrada.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>🌟 Características Clave</h2>
+        <div class="grid">
+            <div class="card">
+                <div class="card-header">⚡ Verificación Instantánea</div>
+                <p>Escaneo rápido de códigos para confirmar la legalidad de la pieza.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">🚨 Notificaciones de Alerta</div>
+                <p>Si tu moto o una de sus partes es reportada como robada, la comunidad y las autoridades reciben una alerta.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">🏪 Red de Talleres Confiables</div>
+                <p>Un directorio de talleres certificados que usan y venden solo autopartes verificadas por MotoSegura.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="container" style="text-align: center; padding: 3rem 0;">
+        <div class="card">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">
+                ¿Para Quién es MotoSegura?
+            </h2>
+            <div class="grid" style="margin-top: 2rem;">
+                <div>
+                    <h3 style="color: var(--primary-color);">👨‍🔧 Dueños de Motocicletas</h3>
+                    <p>Para proteger su inversión y evitar comprar piezas ilegales.</p>
+                </div>
+                <div>
+                    <h3 style="color: var(--primary-color);">🔧 Talleres y Tiendas</h3>
+                    <p>Para ofrecer productos con total transparencia y seguridad a sus clientes.</p>
+                </div>
+                <div>
+                    <h3 style="color: var(--primary-color);">👮 Autoridades y Aseguradoras</h3>
+                    <p>Para facilitar la identificación de vehículos y piezas robadas.</p>
+                </div>
+            </div>
+            <div style="margin-top: 3rem;">
+                <a href="register.html" class="btn btn-primary" style="font-size: 1.2rem; padding: 1.2rem 3rem;">
+                    Únete a MotoSegura Ahora
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 MotoSegura - Campaña Repuestos Seguros. Todos los derechos reservados.</p>
+        <p style="margin-top: 0.5rem; color: var(--text-gray);">Protegiendo motocicletas y combatiendo el mercado ilegal de autopartes</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

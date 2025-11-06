@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Autoparte - MotoSegura</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="MotoSegura - Repuestos Seguros" class="logo-img">
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="verificar.html">Verificar QR</a></li>
+                <li><a href="marketplace.html">Marketplace</a></li>
+                <li><a href="login.html" id="loginLink">Iniciar Sesión</a></li>
+                <li><a href="dashboard.html" id="dashboardLink" class="hidden">Mi Panel</a></li>
+                <li><a href="#" id="logoutLink" class="hidden">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="container" style="margin-top: 120px;">
+        <div class="card">
+            <h2 class="card-header">🔍 Verificar Autoparte</h2>
+            <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                Escanea el código QR o ingresa el código único de la autoparte para verificar su origen
+            </p>
+            
+            <div id="alertContainer"></div>
+
+            <form id="verificarForm">
+                <div class="form-group">
+                    <label for="codigo">Código Único de la Autoparte</label>
+                    <input type="text" id="codigo" name="codigo" class="form-control" 
+                           placeholder="Ej: AP-1234-5678-90AB" required>
+                </div>
+                <div class="form-group">
+                    <label for="ubicacion">Ubicación de Verificación (Opcional)</label>
+                    <input type="text" id="ubicacion" name="ubicacion" class="form-control" 
+                           placeholder="Ej: Bogotá, Colombia">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    Verificar Autoparte
+                </button>
+            </form>
+
+            <!-- Resultado de la verificación -->
+            <div id="resultadoContainer" class="hidden" style="margin-top: 2rem;">
+                <hr style="border-color: var(--border-color); margin: 2rem 0;">
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Resultado de la Verificación</h3>
+                <div id="resultadoContent"></div>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="card">
+            <h3 style="color: var(--primary-color); margin-bottom: 1rem;">
+                💡 ¿Cómo funciona la verificación?
+            </h3>
+            <div class="grid">
+                <div>
+                    <h4 style="color: var(--text-light);">1️⃣ Escanea o ingresa el código</h4>
+                    <p style="color: var(--text-gray);">Usa el código QR o el código alfanumérico de la autoparte</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--text-light);">2️⃣ Sistema verifica</h4>
+                    <p style="color: var(--text-gray);">Nuestro sistema consulta la base de datos en tiempo real</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--text-light);">3️⃣ Obtén resultado</h4>
+                    <p style="color: var(--text-gray);">Sabrás si la pieza es legítima, robada o no registrada</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 MotoSegura. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.getElementById('verificarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value.trim();
+            const ubicacion = document.getElementById('ubicacion').value.trim();
+            
+            if (!codigo) {
+                showAlert('Por favor ingrese un código', 'warning');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                let response;
+                
+                if (auth.isLoggedIn()) {
+                    // Usuario autenticado - registrar verificación
+                    response = await apiRequest('/verificacion/verificar', 'POST', {
+                        codigo_unico: codigo,
+                        ubicacion: ubicacion || null
+                    }, true);
+                } else {
+                    // Usuario no autenticado - solo consulta
+                    response = await apiRequest(`/autopartes/buscar/${codigo}`, 'GET');
+                }
+
+                hideLoading();
+
+                const resultadoContainer = document.getElementById('resultadoContainer');
+                const resultadoContent = document.getElementById('resultadoContent');
+                
+                resultadoContainer.classList.remove('hidden');
+
+                if (response.success) {
+                    const data = response.data.autoparte || response.data;
+                    const resultado = response.data.resultado;
+                    const mensaje = response.data.mensaje;
+
+                    let statusClass = 'success';
+                    let statusIcon = '✅';
+                    let statusText = 'Legítima';
+
+                    if (resultado === 'robada' || data.estado === 'reportada_robada') {
+                        statusClass = 'danger';
+                        statusIcon = '🚨';
+                        statusText = 'ROBADA';
+                    } else if (resultado === 'sospechosa') {
+                        statusClass = 'warning';
+                        statusIcon = '⚠️';
+                        statusText = 'Sospechosa';
+                    } else if (resultado === 'no_registrada') {
+                        statusClass = 'warning';
+                        statusIcon = '❓';
+                        statusText = 'No Registrada';
+                    }
+
+                    resultadoContent.innerHTML = `
+                        <div class="alert alert-${statusClass}" style="font-size: 1.2rem; text-align: center;">
+                            <strong>${statusIcon} ${statusText}</strong>
+                            ${mensaje ? `<p style="margin-top: 0.5rem;">${mensaje}</p>` : ''}
+                        </div>
+                        
+                        ${data ? `
+                            <div style="margin-top: 1.5rem;">
+                                <h4 style="color: var(--primary-color);">Información de la Autoparte</h4>
+                                <table class="table">
+                                    <tr>
+                                        <th>Código:</th>
+                                        <td>${data.codigo_unico || codigo}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Tipo:</th>
+                                        <td>${data.tipo_parte || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Nombre:</th>
+                                        <td>${data.nombre_parte || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Marca:</th>
+                                        <td>${data.marca || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Estado:</th>
+                                        <td><span class="badge badge-${statusClass}">${data.estado || statusText}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fecha de Registro:</th>
+                                        <td>${data.fecha_registro ? formatDate(data.fecha_registro) : 'N/A'}</td>
+                                    </tr>
+                                    ${data.propietario_nombre ? `
+                                        <tr>
+                                            <th>Propietario:</th>
+                                            <td>${data.propietario_nombre}</td>
+                                        </tr>
+                                    ` : ''}
+                                </table>
+                            </div>
+                        ` : ''}
+                    `;
+
+                    if (resultado === 'robada' || data.estado === 'reportada_robada') {
+                        showAlert('¡ALERTA! Esta autoparte ha sido reportada como robada. Se ha notificado a las autoridades.', 'danger');
+                    }
+                }
+            } catch (error) {
+                hideLoading();
+                const resultadoContainer = document.getElementById('resultadoContainer');
+                const resultadoContent = document.getElementById('resultadoContent');
+                
+                resultadoContainer.classList.remove('hidden');
+                resultadoContent.innerHTML = `
+                    <div class="alert alert-warning">
+                        <strong>❓ No Encontrada</strong>
+                        <p style="margin-top: 0.5rem;">Esta autoparte no está registrada en el sistema MotoSegura.</p>
+                        <p style="margin-top: 0.5rem;">Si eres el propietario, 
+                        <a href="register.html" style="color: var(--primary-color);">regístrala aquí</a>.</p>
+                    </div>
+                `;
+                showAlert(error.message || 'Autoparte no encontrada', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - MotoSegura</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="images/logo.png" alt="MotoSegura - Repuestos Seguros" class="logo-img">
+            </a>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="dashboard.html" id="dashboardLink">Mi Panel</a></li>
+                <li><a href="verificar.html">Verificar QR</a></li>
+                <li><a href="reportes.html">Reportes</a></li>
+                <li><a href="#" id="logoutLink">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="container" style="margin-top: 120px;">
+        <div class="card">
+            <h2 class="card-header">🚨 Reportar Robo</h2>
+            <p style="color: var(--text-gray); margin-bottom: 2rem;">
+                Reporta el robo de tu motocicleta o autoparte para alertar a la comunidad y autoridades
+            </p>
+
+            <form id="formReporte">
+                <div class="form-group">
+                    <label for="tipoReporte">¿Qué fue robado?</label>
+                    <select id="tipoReporte" class="form-control" required onchange="cargarOpciones()">
+                        <option value="">Seleccione una opción</option>
+                        <option value="motocicleta">Motocicleta Completa</option>
+                        <option value="autoparte">Autoparte Específica</option>
+                    </select>
+                </div>
+
+                <div id="selectorMoto" class="form-group hidden">
+                    <label for="motocicleta_id">Motocicleta</label>
+                    <select id="motocicleta_id" class="form-control">
+                        <option value="">Seleccione una motocicleta</option>
+                    </select>
+                </div>
+
+                <div id="selectorParte" class="form-group hidden">
+                    <label for="autoparte_id">Autoparte</label>
+                    <select id="autoparte_id" class="form-control">
+                        <option value="">Seleccione una autoparte</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion">Descripción del Robo</label>
+                    <textarea id="descripcion" class="form-control" required 
+                              placeholder="Describa las circunstancias del robo..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha_robo">Fecha del Robo</label>
+                    <input type="date" id="fecha_robo" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lugar_robo">Lugar del Robo</label>
+                    <input type="text" id="lugar_robo" class="form-control" 
+                           placeholder="Ej: Calle 123, Bogotá" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_denuncia">Número de Denuncia (Opcional)</label>
+                    <input type="text" id="numero_denuncia" class="form-control" 
+                           placeholder="Número de denuncia policial">
+                </div>
+
+                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                    Crear Reporte de Robo
+                </button>
+            </form>
+        </div>
+
+        <!-- Mis reportes -->
+        <div class="card">
+            <h2 class="card-header">📋 Mis Reportes</h2>
+            <div id="reportesContainer"></div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 MotoSegura. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        if (!requireAuth()) {
+            // Ya redirige automáticamente
+        }
+
+        async function cargarOpciones() {
+            const tipo = document.getElementById('tipoReporte').value;
+            const selectorMoto = document.getElementById('selectorMoto');
+            const selectorParte = document.getElementById('selectorParte');
+
+            selectorMoto.classList.add('hidden');
+            selectorParte.classList.add('hidden');
+
+            if (tipo === 'motocicleta') {
+                try {
+                    const response = await apiRequest('/motos/mis-motos', 'GET', null, true);
+                    const select = document.getElementById('motocicleta_id');
+                    select.innerHTML = '<option value="">Seleccione una motocicleta</option>';
+                    response.data.forEach(moto => {
+                        select.innerHTML += `<option value="${moto.id}">${moto.marca} ${moto.modelo} - ${moto.placa || moto.numero_serie}</option>`;
+                    });
+                    selectorMoto.classList.remove('hidden');
+                } catch (error) {
+                    showAlert('Error al cargar motocicletas: ' + error.message, 'danger');
+                }
+            } else if (tipo === 'autoparte') {
+                try {
+                    const response = await apiRequest('/autopartes/mis-partes', 'GET', null, true);
+                    const select = document.getElementById('autoparte_id');
+                    select.innerHTML = '<option value="">Seleccione una autoparte</option>';
+                    response.data.forEach(parte => {
+                        select.innerHTML += `<option value="${parte.id}">${parte.tipo_parte} - ${parte.nombre_parte} (${parte.moto_marca} ${parte.moto_modelo})</option>`;
+                    });
+                    selectorParte.classList.remove('hidden');
+                } catch (error) {
+                    showAlert('Error al cargar autopartes: ' + error.message, 'danger');
+                }
+            }
+        }
+
+        document.getElementById('formReporte').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const tipo = document.getElementById('tipoReporte').value;
+            const formData = {
+                descripcion: document.getElementById('descripcion').value,
+                fecha_robo: document.getElementById('fecha_robo').value,
+                lugar_robo: document.getElementById('lugar_robo').value,
+                numero_denuncia: document.getElementById('numero_denuncia').value
+            };
+
+            if (tipo === 'motocicleta') {
+                formData.motocicleta_id = parseInt(document.getElementById('motocicleta_id').value);
+                if (!formData.motocicleta_id) {
+                    showAlert('Seleccione una motocicleta', 'warning');
+                    return;
+                }
+            } else if (tipo === 'autoparte') {
+                formData.autoparte_id = parseInt(document.getElementById('autoparte_id').value);
+                if (!formData.autoparte_id) {
+                    showAlert('Seleccione una autoparte', 'warning');
+                    return;
+                }
+            }
+
+            try {
+                showLoading();
+                const response = await apiRequest('/reportes/crear', 'POST', formData, true);
+                hideLoading();
+
+                if (response.success) {
+                    showAlert('Reporte creado exitosamente. Se ha notificado a las autoridades.', 'success');
+                    e.target.reset();
+                    document.getElementById('selectorMoto').classList.add('hidden');
+                    document.getElementById('selectorParte').classList.add('hidden');
+                    cargarReportes();
+                }
+            } catch (error) {
+                hideLoading();
+                showAlert('Error al crear reporte: ' + error.message, 'danger');
+            }
+        });
+
+        async function cargarReportes() {
+            try {
+                const response = await apiRequest('/reportes/mis-reportes', 'GET', null, true);
+                mostrarReportes(response.data);
+            } catch (error) {
+                showAlert('Error al cargar reportes: ' + error.message, 'danger');
+            }
+        }
+
+        function mostrarReportes(reportes) {
+            const container = document.getElementById('reportesContainer');
+
+            if (!reportes || reportes.length === 0) {
+                container.innerHTML = `
+                    <p style="color: var(--text-gray); text-align: center; padding: 2rem;">
+                        No tienes reportes registrados
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Lugar</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${reportes.map(reporte => `
+                            <tr>
+                                <td>${formatDate(reporte.fecha_reporte)}</td>
+                                <td>${reporte.moto_marca ? 'Motocicleta' : 'Autoparte'}</td>
+                                <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">
+                                    ${reporte.descripcion}
+                                </td>
+                                <td>${reporte.lugar_robo || 'N/A'}</td>
+                                <td>
+                                    <span class="badge badge-${getBadgeEstado(reporte.estado)}">
+                                        ${reporte.estado}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function getBadgeEstado(estado) {
+            switch(estado) {
+                case 'reportado': return 'danger';
+                case 'en_investigacion': return 'warning';
+                case 'recuperado': return 'success';
+                case 'cerrado': return 'info';
+                default: return 'info';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarReportes();
+        });
+
+        window.cargarOpciones = cargarOpciones;
+    </script>
+</body>
+</html>
