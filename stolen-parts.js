@@ -70,24 +70,39 @@ function generateQRCode(reportData) {
     const qrContainer = document.getElementById('qrCodeContainer');
     const reportInfo = document.getElementById('reportInfo');
     
+    // Verificar que QRCode.js esté cargado
+    if (typeof QRCode === 'undefined') {
+        console.error('❌ QRCode.js no está cargado');
+        alert('Error: No se pudo cargar la librería de códigos QR. Por favor, recarga la página.');
+        return;
+    }
+    
     // Limpiar contenedor
     qrContainer.innerHTML = '';
     
     // Crear datos para el QR - Solo el ID para simplificar
     const qrData = reportData.id;
     
-    // Generar QR con configuración mejorada
-    const qrCode = new QRCode(qrContainer, {
-        text: qrData,
-        width: 300,
-        height: 300,
-        colorDark: "#1a1a2e",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
-    
-    // Guardar referencia del QR para descarga
-    window.currentQRCode = qrContainer;
+    try {
+        // Generar QR con configuración mejorada
+        const qrCode = new QRCode(qrContainer, {
+            text: qrData,
+            width: 300,
+            height: 300,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        // Guardar referencia del QR para descarga
+        window.currentQRCode = qrContainer;
+        
+        console.log('✅ QR generado exitosamente:', qrData);
+    } catch (error) {
+        console.error('❌ Error al generar QR:', error);
+        alert('Error al generar el código QR. Verifica que la página esté completamente cargada.');
+        return;
+    }
     
     // Mostrar información del reporte
     const categoryName = getCategoryName(reportData.part.category);
@@ -116,36 +131,66 @@ function closeQRModal() {
 }
 
 function downloadQR() {
+    console.log('🔽 Intentando descargar QR...');
+    
     const qrCanvas = document.querySelector('#qrCodeContainer canvas');
-    if (qrCanvas) {
-        try {
-            // Crear un canvas temporal con fondo blanco
-            const tempCanvas = document.createElement('canvas');
-            const ctx = tempCanvas.getContext('2d');
-            tempCanvas.width = qrCanvas.width;
-            tempCanvas.height = qrCanvas.height;
-            
-            // Fondo blanco
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            
-            // Dibujar el QR encima
-            ctx.drawImage(qrCanvas, 0, 0);
-            
-            // Descargar
-            const link = document.createElement('a');
-            const timestamp = new Date().getTime();
-            link.download = `qr-parte-robada-${timestamp}.png`;
-            link.href = tempCanvas.toDataURL('image/png');
-            link.click();
-            
-            showNotification('✓ QR descargado exitosamente', 'success');
-        } catch (error) {
-            console.error('Error al descargar QR:', error);
-            showNotification('Error al descargar el QR', 'warning');
-        }
-    } else {
-        showNotification('No se encontró el código QR', 'warning');
+    
+    if (!qrCanvas) {
+        console.error('❌ No se encontró el canvas del QR');
+        alert('No se encontró el código QR. Genera uno primero.');
+        return;
+    }
+    
+    try {
+        // Esperar un momento para asegurar que el QR esté renderizado
+        setTimeout(() => {
+            try {
+                // Crear un canvas temporal con fondo blanco
+                const tempCanvas = document.createElement('canvas');
+                const ctx = tempCanvas.getContext('2d');
+                tempCanvas.width = qrCanvas.width;
+                tempCanvas.height = qrCanvas.height;
+                
+                // Fondo blanco
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Dibujar el QR encima
+                ctx.drawImage(qrCanvas, 0, 0);
+                
+                // Convertir a blob y descargar
+                tempCanvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        const timestamp = new Date().getTime();
+                        link.download = `qr-parte-robada-${timestamp}.png`;
+                        link.href = url;
+                        
+                        // Agregar al DOM temporalmente para Firefox
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        // Limpiar URL
+                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                        
+                        console.log('✅ QR descargado exitosamente');
+                        showNotification('✓ QR descargado exitosamente', 'success');
+                    } else {
+                        throw new Error('No se pudo crear el blob');
+                    }
+                }, 'image/png');
+                
+            } catch (error) {
+                console.error('❌ Error al procesar QR:', error);
+                alert('Error al descargar el QR. Intenta hacer clic derecho en la imagen y "Guardar imagen como..."');
+            }
+        }, 500); // Esperar 500ms para que el QR se renderice completamente
+        
+    } catch (error) {
+        console.error('❌ Error general al descargar QR:', error);
+        alert('Error al descargar el QR. Intenta con otro navegador o guarda la imagen manualmente.');
     }
 }
 
