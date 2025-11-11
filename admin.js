@@ -305,12 +305,20 @@ function openProductModal(productId = null) {
             document.getElementById('productCategory').value = product.category;
             document.getElementById('productImage').value = product.image;
             document.getElementById('productDescription').value = product.description || '';
+            document.getElementById('productStock').value = product.stock || 10;
+            document.getElementById('productCondition').value = product.condition || 'Nuevo';
+            document.getElementById('productYear').value = product.year || '2024';
+            document.getElementById('productFeatured').checked = product.featured || false;
         }
     } else {
-        // Modo agregar
+        // Modo agregar - valores por defecto
         modalTitle.innerHTML = '<i class="fas fa-plus-circle"></i> Agregar Producto';
         saveButtonText.textContent = 'Guardar Producto';
         document.getElementById('editProductId').value = '';
+        document.getElementById('productStock').value = 10;
+        document.getElementById('productCondition').value = 'Nuevo';
+        document.getElementById('productYear').value = '2024';
+        document.getElementById('productFeatured').checked = false;
     }
     
     modal.style.display = 'flex';
@@ -329,7 +337,12 @@ function handleProductSubmit(e) {
         price: parseFloat(document.getElementById('productPrice').value),
         category: document.getElementById('productCategory').value,
         image: document.getElementById('productImage').value.trim(),
-        description: document.getElementById('productDescription').value.trim()
+        description: document.getElementById('productDescription').value.trim(),
+        stock: parseInt(document.getElementById('productStock').value) || 10,
+        condition: document.getElementById('productCondition').value,
+        year: document.getElementById('productYear').value.trim(),
+        currency: '$',
+        featured: document.getElementById('productFeatured').checked
     };
     
     if (editingProductId) {

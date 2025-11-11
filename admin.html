@@ -157,6 +157,32 @@
                     <textarea id="productDescription" class="form-control" rows="3" placeholder="Descripción del producto..."></textarea>
                 </div>
 
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="productStock"><i class="fas fa-boxes"></i> Stock</label>
+                        <input type="number" id="productStock" class="form-control" min="0" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="productCondition"><i class="fas fa-check-circle"></i> Condición</label>
+                        <select id="productCondition" class="form-control">
+                            <option value="Nuevo">Nuevo</option>
+                            <option value="Usado">Usado</option>
+                            <option value="Remanufacturado">Remanufacturado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productYear"><i class="fas fa-calendar"></i> Año</label>
+                        <input type="text" id="productYear" class="form-control" value="2024">
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: rgba(0,212,255,0.1); border-radius: 8px;">
+                    <input type="checkbox" id="productFeatured" style="width: 20px; height: 20px; cursor: pointer;">
+                    <label for="productFeatured" style="margin: 0; cursor: pointer; color: var(--primary-color); font-weight: bold;">
+                        <i class="fas fa-star"></i> Destacar en página principal
+                    </label>
+                </div>
+
                 <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                     <button type="submit" class="btn btn-primary" style="flex: 1;">
                         <i class="fas fa-save"></i> <span id="saveButtonText">Guardar Producto</span>

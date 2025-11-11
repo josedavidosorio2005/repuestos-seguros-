@@ -91,7 +91,14 @@ function loadFeaturedProducts() {
 
     featuredProducts.innerHTML = '';
     
-    const featured = data.products.filter(p => p.featured).slice(0, 6);
+    // Mostrar productos destacados o los primeros 6 si no hay destacados
+    let featured = data.products.filter(p => p.featured);
+    if (featured.length === 0) {
+        // Si no hay productos destacados, mostrar los primeros 6
+        featured = data.products.slice(0, 6);
+    } else {
+        featured = featured.slice(0, 6);
+    }
     
     featured.forEach(product => {
         const productCard = createProductCard(product);
@@ -209,24 +216,31 @@ function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card fade-in';
     
-    const stockStatus = product.stock > 5 ? 'in-stock' : product.stock > 0 ? 'low-stock' : 'out-stock';
-    const stockText = product.stock > 5 ? 'En stock' : product.stock > 0 ? `Solo ${product.stock} disponibles` : 'Agotado';
+    // Manejar productos del admin (sin stock) y del data.json (con stock)
+    const stock = product.stock !== undefined ? product.stock : 10; // Default 10 si no está definido
+    const stockStatus = stock > 5 ? 'in-stock' : stock > 0 ? 'low-stock' : 'out-stock';
+    const stockText = stock > 5 ? 'En stock' : stock > 0 ? `Solo ${stock} disponibles` : 'Agotado';
+    
+    const description = product.description || 'Producto de calidad para tu motocicleta';
+    const condition = product.condition || 'Nuevo';
+    const year = product.year || '2024';
+    const currency = product.currency || '$';
     
     card.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" class="product-image">
+        <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Imagen+No+Disponible'">
         <div class="product-info">
             <h3 class="product-name">${product.name}</h3>
-            <p class="product-description">${product.description}</p>
+            <p class="product-description">${description}</p>
             <div class="product-meta">
-                <span class="product-badge">${product.condition}</span>
-                <span class="product-badge">${product.year}</span>
+                <span class="product-badge">${condition}</span>
+                <span class="product-badge">${year}</span>
             </div>
             <div class="product-details">
-                <span class="product-price">${product.currency}${product.price.toLocaleString()}</span>
+                <span class="product-price">${currency}${parseFloat(product.price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 <span class="product-stock ${stockStatus}">${stockText}</span>
             </div>
-            <button class="btn-add-cart" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-                <i class="fas fa-shopping-cart"></i> ${product.stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+            <button class="btn-add-cart" onclick="addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
+                <i class="fas fa-shopping-cart"></i> ${stock === 0 ? 'Agotado' : 'Agregar al carrito'}
             </button>
         </div>
     `;
