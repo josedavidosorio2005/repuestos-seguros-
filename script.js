@@ -118,7 +118,17 @@ function loadCategories() {
 // Cargar productos destacados
 function loadFeaturedProducts() {
     const featuredProducts = document.getElementById('featuredProducts');
-    if (!featuredProducts || !data) return;
+    if (!featuredProducts) return;
+    
+    // Si no hay datos aún, mostrar mensaje de carga
+    if (!data || !data.products || data.products.length === 0) {
+        featuredProducts.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                <p style="color: var(--text-secondary);">Cargando productos destacados...</p>
+            </div>
+        `;
+        return;
+    }
 
     featuredProducts.innerHTML = '';
     
@@ -156,9 +166,12 @@ function loadFooterCategories() {
 
 // ===== Página de Productos =====
 function initProductsPage() {
-    loadAllProducts();
-    setupFilters();
-    loadFooterCategories();
+    // Pequeño retraso para asegurar que los productos están cargados
+    setTimeout(() => {
+        setupFilters();
+        loadAllProducts();
+        loadFooterCategories();
+    }, 100);
 }
 
 // Cargar todos los productos
@@ -290,25 +303,37 @@ function createProductCard(product) {
         priceFormatted = `${currency}${parseFloat(product.price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     }
     
-    card.innerHTML = `
-        <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Imagen+No+Disponible'">
-        <div class="product-info">
-            <h3 class="product-name">${product.name}</h3>
-            <p class="product-description">${description}</p>
-            <div class="product-meta">
-                ${brand ? `<span class="product-badge"><i class="fas fa-tag"></i> ${brand}</span>` : ''}
-                <span class="product-badge"><i class="fas fa-check-circle"></i> ${condition}</span>
-                <span class="product-badge"><i class="fas fa-calendar"></i> ${year}</span>
-            </div>
-            <div class="product-details">
-                <span class="product-price">${priceFormatted}</span>
-                <span class="product-stock ${stockStatus}"><i class="fas fa-box"></i> ${stockText}</span>
-            </div>
-            <button class="btn-add-cart" onclick="addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
-                <i class="fas fa-shopping-cart"></i> ${stock === 0 ? 'Agotado' : 'Agregar al carrito'}
-            </button>
+    // Crear imagen con placeholder mientras carga
+    const img = document.createElement('img');
+    img.className = 'product-image';
+    img.alt = product.name;
+    img.loading = 'lazy'; // Carga diferida
+    img.src = product.image;
+    img.onerror = function() {
+        this.src = 'https://via.placeholder.com/300x250/1a1a2e/00d4ff?text=Imagen+No+Disponible';
+    };
+    
+    const productInfo = document.createElement('div');
+    productInfo.className = 'product-info';
+    productInfo.innerHTML = `
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-description">${description}</p>
+        <div class="product-meta">
+            ${brand ? `<span class="product-badge"><i class="fas fa-tag"></i> ${brand}</span>` : ''}
+            <span class="product-badge"><i class="fas fa-check-circle"></i> ${condition}</span>
+            <span class="product-badge"><i class="fas fa-calendar"></i> ${year}</span>
         </div>
+        <div class="product-details">
+            <span class="product-price">${priceFormatted}</span>
+            <span class="product-stock ${stockStatus}"><i class="fas fa-box"></i> ${stockText}</span>
+        </div>
+        <button class="btn-add-cart" onclick="addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
+            <i class="fas fa-shopping-cart"></i> ${stock === 0 ? 'Agotado' : 'Agregar al carrito'}
+        </button>
     `;
+    
+    card.appendChild(img);
+    card.appendChild(productInfo);
     
     return card;
 }

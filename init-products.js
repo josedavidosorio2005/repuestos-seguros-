@@ -276,13 +276,11 @@ const allProducts = [...defaultProducts, ...moreProducts];
 
 // Guardar productos en localStorage - SIEMPRE actualizar para asegurar que estén disponibles
 const forceUpdate = true; // Mantener en true para asegurar que los productos se carguen
-if (!localStorage.getItem('products') || forceUpdate) {
-    localStorage.setItem('products', JSON.stringify(allProducts));
-    console.log('✅ Catálogo completo inicializado:', allProducts.length, 'productos');
-    console.log('📦 Por marcas: Yamaha, Honda, Suzuki, Kawasaki, KTM, Bajaj, TVS, AKT, Universal, Accesorios');
-    
-    // Disparar evento para que script.js recargue los datos
-    window.dispatchEvent(new Event('productsLoaded'));
-} else {
-    console.log('ℹ️ Productos ya existen en localStorage');
-}
+
+console.log('🔄 Inicializando catálogo de productos...');
+localStorage.setItem('products', JSON.stringify(allProducts));
+console.log('✅ Catálogo completo inicializado:', allProducts.length, 'productos');
+console.log('📦 Por marcas: Yamaha, Honda, Suzuki, Kawasaki, KTM, Bajaj, TVS, AKT, Universal, Accesorios');
+
+// Disparar evento para que script.js recargue los datos
+window.dispatchEvent(new Event('productsLoaded'));
