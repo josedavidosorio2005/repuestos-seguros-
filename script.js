@@ -530,7 +530,203 @@ function initCartPage() {
 }
 
 function checkout() {
-    showNotification('Funcionalidad de pago en desarrollo', 'info');
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    
+    if (cart.length === 0) {
+        showNotification('El carrito está vacío', 'warning');
+        return;
+    }
+    
+    // Generar información de la compra
+    const purchaseId = 'VTA-' + Date.now();
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const iva = total * 0.19;
+    const totalWithIva = total + iva;
+    
+    const purchaseData = {
+        id: purchaseId,
+        date: new Date().toISOString(),
+        items: cart,
+        subtotal: total,
+        iva: iva,
+        total: totalWithIva
+    };
+    
+    // Mostrar modal con QR
+    showPurchaseQRModal(purchaseData);
+    
+    // Vaciar carrito
+    localStorage.setItem('cart', JSON.stringify([]));
+    updateCartCount();
+    loadCartItems();
+}
+
+function showPurchaseQRModal(purchaseData) {
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
+            border: 2px solid #00d4ff;
+            text-align: center;
+            position: relative;
+            animation: slideInUp 0.4s ease;
+        ">
+            <button onclick="this.closest('.qr-modal').remove()" style="
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                background: transparent;
+                border: none;
+                color: #00d4ff;
+                font-size: 2rem;
+                cursor: pointer;
+                transition: transform 0.3s;
+            " onmouseover="this.style.transform='rotate(90deg)'" onmouseout="this.style.transform='rotate(0deg)'">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle" style="font-size: 4rem; color: #00ff88; margin-bottom: 1rem;"></i>
+                <h2 style="color: #00d4ff; margin: 0; font-size: 2rem;">¡Compra Exitosa!</h2>
+                <p style="color: #888; margin-top: 0.5rem;">Venta ID: ${purchaseData.id}</p>
+            </div>
+            
+            <div style="
+                background: white;
+                padding: 1.5rem;
+                border-radius: 15px;
+                margin: 1.5rem auto;
+                display: inline-block;
+            ">
+                <div id="qrCodePurchase"></div>
+            </div>
+            
+            <div style="
+                background: rgba(0, 212, 255, 0.1);
+                border: 1px solid #00d4ff;
+                border-radius: 10px;
+                padding: 1rem;
+                margin: 1.5rem 0;
+                text-align: left;
+            ">
+                <h3 style="color: #00d4ff; margin-top: 0; font-size: 1.2rem;">
+                    <i class="fas fa-receipt"></i> Resumen de Compra
+                </h3>
+                <div style="color: #ddd; line-height: 1.8;">
+                    <p><strong>Productos:</strong> ${purchaseData.items.length}</p>
+                    <p><strong>Subtotal:</strong> ${formatPrice(purchaseData.subtotal)}</p>
+                    <p><strong>IVA (19%):</strong> ${formatPrice(purchaseData.iva)}</p>
+                    <p style="font-size: 1.3rem; color: #00ff88; margin-top: 0.5rem;">
+                        <strong>Total:</strong> ${formatPrice(purchaseData.total)}
+                    </p>
+                </div>
+            </div>
+            
+            <div style="
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                margin-top: 1.5rem;
+            ">
+                <button onclick="downloadQRPurchase()" class="btn-primary" style="
+                    padding: 0.8rem 1.5rem;
+                    background: linear-gradient(135deg, #00d4ff, #0099ff);
+                    border: none;
+                    border-radius: 10px;
+                    color: #1a1a2e;
+                    font-weight: bold;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                ">
+                    <i class="fas fa-download"></i>
+                    Descargar QR
+                </button>
+                
+                <button onclick="this.closest('.qr-modal').remove(); window.location.href='productos.html'" class="btn-secondary" style="
+                    padding: 0.8rem 1.5rem;
+                    background: rgba(255, 255, 255, 0.1);
+                    border: 2px solid #00d4ff;
+                    border-radius: 10px;
+                    color: #00d4ff;
+                    font-weight: bold;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                ">
+                    <i class="fas fa-shopping-bag"></i>
+                    Seguir Comprando
+                </button>
+            </div>
+            
+            <p style="
+                margin-top: 1.5rem;
+                color: #888;
+                font-size: 0.9rem;
+            ">
+                <i class="fas fa-info-circle"></i>
+                Guarda este código QR como comprobante de compra
+            </p>
+        </div>
+    `;
+    
+    modal.className = 'qr-modal';
+    document.body.appendChild(modal);
+    
+    // Generar código QR
+    setTimeout(() => {
+        if (typeof QRCode !== 'undefined') {
+            const qrCode = new QRCode(document.getElementById('qrCodePurchase'), {
+                text: JSON.stringify(purchaseData),
+                width: 200,
+                height: 200,
+                colorDark: '#1a1a2e',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            window.currentPurchaseQR = document.getElementById('qrCodePurchase');
+        } else {
+            document.getElementById('qrCodePurchase').innerHTML = `
+                <p style="color: #ff3366; padding: 2rem;">
+                    Error al generar código QR
+                </p>
+            `;
+        }
+    }, 100);
+}
+
+function downloadQRPurchase() {
+    const qrCanvas = document.querySelector('#qrCodePurchase canvas');
+    if (qrCanvas) {
+        const link = document.createElement('a');
+        link.download = `compra-${Date.now()}.png`;
+        link.href = qrCanvas.toDataURL();
+        link.click();
+        showNotification('QR descargado correctamente', 'success');
+    }
 }
 
 // ===== Página de Contacto =====
@@ -648,6 +844,26 @@ style.textContent = `
         to {
             transform: translateX(400px);
             opacity: 0;
+        }
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideInUp {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
         }
     }
 `;
