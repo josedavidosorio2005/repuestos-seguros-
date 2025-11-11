@@ -77,130 +77,216 @@ function loadProducts() {
             {
                 id: 1,
                 name: 'Kit de Pastillas de Freno Delanteras',
-                price: 45.99,
+                price: 180000,
                 category: 'frenos',
                 image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=500',
-                description: 'Pastillas de freno de alta calidad para motos deportivas'
+                description: 'Pastillas de freno de alta calidad para motos deportivas',
+                stock: 15,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Brembo',
+                currency: 'COP',
+                featured: true
             },
             {
                 id: 2,
                 name: 'Aceite Motor Sintético 10W-40',
-                price: 32.50,
+                price: 125000,
                 category: 'motor',
                 image: 'https://images.unsplash.com/photo-1558346547-4439e5b6d8a4?w=500',
-                description: 'Aceite sintético premium para motor de moto'
+                description: 'Aceite sintético premium para motor de moto',
+                stock: 25,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Castrol',
+                currency: 'COP',
+                featured: true
             },
             {
                 id: 3,
                 name: 'Cadena de Transmisión Reforzada',
-                price: 68.00,
+                price: 270000,
                 category: 'transmision',
                 image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                description: 'Cadena reforzada para alto rendimiento'
+                description: 'Cadena reforzada para alto rendimiento',
+                stock: 12,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'DID',
+                currency: 'COP',
+                featured: true
             },
             {
                 id: 4,
                 name: 'Batería 12V 10Ah',
-                price: 89.99,
+                price: 350000,
                 category: 'electrico',
                 image: 'https://images.unsplash.com/photo-1609091839311-d2064f51e0dd?w=500',
-                description: 'Batería de larga duración'
+                description: 'Batería de larga duración',
+                stock: 8,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Yuasa',
+                currency: 'COP',
+                featured: true
             },
             {
                 id: 5,
                 name: 'Escape Deportivo Acero Inoxidable',
-                price: 245.00,
+                price: 950000,
                 category: 'escape',
                 image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                description: 'Escape deportivo de alto rendimiento'
+                description: 'Escape deportivo de alto rendimiento',
+                stock: 5,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Akrapovic',
+                currency: 'COP',
+                featured: true
             },
             {
                 id: 6,
                 name: 'Amortiguadores Traseros Ajustables',
-                price: 189.99,
+                price: 750000,
                 category: 'suspension',
                 image: 'https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=500',
-                description: 'Amortiguadores de gas con ajuste de precarga'
+                description: 'Amortiguadores de gas con ajuste de precarga',
+                stock: 6,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Öhlins',
+                currency: 'COP',
+                featured: true
             },
             {
                 id: 7,
                 name: 'Kit de Embrague Completo',
-                price: 156.50,
+                price: 620000,
                 category: 'transmision',
                 image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                description: 'Kit completo con discos y resortes'
+                description: 'Kit completo con discos y resortes',
+                stock: 10,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'EBC',
+                currency: 'COP'
             },
             {
                 id: 8,
                 name: 'Filtro de Aire de Alto Flujo',
-                price: 42.00,
+                price: 165000,
                 category: 'motor',
                 image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=500',
-                description: 'Filtro lavable y reutilizable'
+                description: 'Filtro lavable y reutilizable',
+                stock: 20,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'K&N',
+                currency: 'COP'
             },
             {
                 id: 9,
                 name: 'Juego de Luces LED',
-                price: 78.00,
+                price: 310000,
                 category: 'electrico',
                 image: 'https://images.unsplash.com/photo-1609091839311-d2064f51e0dd?w=500',
-                description: 'Luces LED de alta intensidad'
+                description: 'Luces LED de alta intensidad',
+                stock: 15,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Philips',
+                currency: 'COP'
             },
             {
                 id: 10,
                 name: 'Carenado Lateral Derecho',
-                price: 125.00,
+                price: 490000,
                 category: 'carroceria',
                 image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                description: 'Compatible con modelos deportivos'
+                description: 'Compatible con modelos deportivos',
+                stock: 4,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Original',
+                currency: 'COP'
             },
             {
                 id: 11,
                 name: 'Manillar Deportivo Aluminio',
-                price: 95.00,
+                price: 380000,
                 category: 'accesorios',
                 image: 'https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=500',
-                description: 'Manillar ergonómico de aluminio anodizado'
+                description: 'Manillar ergonómico de aluminio anodizado',
+                stock: 8,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'ProTaper',
+                currency: 'COP'
             },
             {
                 id: 12,
                 name: 'Disco de Freno Delantero 300mm',
-                price: 112.00,
+                price: 440000,
                 category: 'frenos',
                 image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=500',
-                description: 'Disco flotante de acero inoxidable'
+                description: 'Disco flotante de acero inoxidable',
+                stock: 7,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Brembo',
+                currency: 'COP'
             },
             {
                 id: 13,
                 name: 'Bujías Iridium (Juego de 4)',
-                price: 34.99,
+                price: 135000,
                 category: 'motor',
                 image: 'https://images.unsplash.com/photo-1558346547-4439e5b6d8a4?w=500',
-                description: 'Bujías de alto rendimiento con electrodo de iridio'
+                description: 'Bujías de alto rendimiento con electrodo de iridio',
+                stock: 30,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'NGK',
+                currency: 'COP'
             },
             {
                 id: 14,
                 name: 'Piñón de Transmisión',
-                price: 28.50,
+                price: 110000,
                 category: 'transmision',
                 image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                description: 'Piñón de acero templado'
+                description: 'Piñón de acero templado',
+                stock: 18,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'JT Sprockets',
+                currency: 'COP'
             },
             {
                 id: 15,
                 name: 'Espejos Retrovisores Deportivos',
-                price: 45.00,
+                price: 175000,
                 category: 'accesorios',
                 image: 'https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=500',
-                description: 'Par de espejos con diseño aerodinámico'
+                description: 'Par de espejos con diseño aerodinámico',
+                stock: 12,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Universal',
+                currency: 'COP'
             },
             {
                 id: 16,
                 name: 'Cúpula Deportiva Ahumada',
-                price: 135.00,
+                price: 530000,
                 category: 'carroceria',
                 image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-                description: 'Cúpula de policarbonato resistente'
+                description: 'Cúpula de policarbonato resistente',
+                stock: 5,
+                condition: 'Nuevo',
+                year: '2024',
+                brand: 'Puig',
+                currency: 'COP'
             }
         ];
         saveProducts();
@@ -308,6 +394,7 @@ function openProductModal(productId = null) {
             document.getElementById('productStock').value = product.stock || 10;
             document.getElementById('productCondition').value = product.condition || 'Nuevo';
             document.getElementById('productYear').value = product.year || '2024';
+            document.getElementById('productBrand').value = product.brand || '';
             document.getElementById('productFeatured').checked = product.featured || false;
         }
     } else {
@@ -318,6 +405,7 @@ function openProductModal(productId = null) {
         document.getElementById('productStock').value = 10;
         document.getElementById('productCondition').value = 'Nuevo';
         document.getElementById('productYear').value = '2024';
+        document.getElementById('productBrand').value = '';
         document.getElementById('productFeatured').checked = false;
     }
     
@@ -341,7 +429,8 @@ function handleProductSubmit(e) {
         stock: parseInt(document.getElementById('productStock').value) || 10,
         condition: document.getElementById('productCondition').value,
         year: document.getElementById('productYear').value.trim(),
-        currency: '$',
+        brand: document.getElementById('productBrand').value.trim() || 'Universal',
+        currency: 'COP',
         featured: document.getElementById('productFeatured').checked
     };
     

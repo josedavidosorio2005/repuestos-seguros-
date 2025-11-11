@@ -157,10 +157,10 @@
                     <textarea id="productDescription" class="form-control" rows="3" placeholder="Descripción del producto..."></textarea>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label for="productStock"><i class="fas fa-boxes"></i> Stock</label>
-                        <input type="number" id="productStock" class="form-control" min="0" value="10">
+                        <label for="productStock"><i class="fas fa-boxes"></i> Stock Disponible</label>
+                        <input type="number" id="productStock" class="form-control" min="0" value="10" placeholder="Ej: 10">
                     </div>
                     <div class="form-group">
                         <label for="productCondition"><i class="fas fa-check-circle"></i> Condición</label>
@@ -170,9 +170,16 @@
                             <option value="Remanufacturado">Remanufacturado</option>
                         </select>
                     </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label for="productYear"><i class="fas fa-calendar"></i> Año</label>
-                        <input type="text" id="productYear" class="form-control" value="2024">
+                        <label for="productYear"><i class="fas fa-calendar"></i> Año / Modelo</label>
+                        <input type="text" id="productYear" class="form-control" value="2024" placeholder="Ej: 2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="productBrand"><i class="fas fa-copyright"></i> Marca</label>
+                        <input type="text" id="productBrand" class="form-control" placeholder="Ej: Yamaha, Honda, Suzuki">
                     </div>
                 </div>
 

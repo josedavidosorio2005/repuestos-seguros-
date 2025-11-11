@@ -224,7 +224,16 @@ function createProductCard(product) {
     const description = product.description || 'Producto de calidad para tu motocicleta';
     const condition = product.condition || 'Nuevo';
     const year = product.year || '2024';
-    const currency = product.currency || '$';
+    const brand = product.brand || '';
+    const currency = product.currency || 'COP';
+    
+    // Formatear precio según moneda
+    let priceFormatted;
+    if (currency === 'COP') {
+        priceFormatted = `$${parseFloat(product.price).toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 0})} COP`;
+    } else {
+        priceFormatted = `${currency}${parseFloat(product.price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
     
     card.innerHTML = `
         <img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text=Imagen+No+Disponible'">
@@ -232,12 +241,13 @@ function createProductCard(product) {
             <h3 class="product-name">${product.name}</h3>
             <p class="product-description">${description}</p>
             <div class="product-meta">
-                <span class="product-badge">${condition}</span>
-                <span class="product-badge">${year}</span>
+                ${brand ? `<span class="product-badge"><i class="fas fa-tag"></i> ${brand}</span>` : ''}
+                <span class="product-badge"><i class="fas fa-check-circle"></i> ${condition}</span>
+                <span class="product-badge"><i class="fas fa-calendar"></i> ${year}</span>
             </div>
             <div class="product-details">
-                <span class="product-price">${currency}${parseFloat(product.price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                <span class="product-stock ${stockStatus}">${stockText}</span>
+                <span class="product-price">${priceFormatted}</span>
+                <span class="product-stock ${stockStatus}"><i class="fas fa-box"></i> ${stockText}</span>
             </div>
             <button class="btn-add-cart" onclick="addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
                 <i class="fas fa-shopping-cart"></i> ${stock === 0 ? 'Agotado' : 'Agregar al carrito'}
@@ -351,14 +361,22 @@ function initCartPage() {
         const itemTotal = product.price * item.quantity;
         subtotal += itemTotal;
         
+        const currency = product.currency || 'COP';
+        const pricePerUnit = currency === 'COP' 
+            ? `$${product.price.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP`
+            : `${currency}${product.price.toLocaleString()}`;
+        const itemTotalFormatted = currency === 'COP'
+            ? `$${itemTotal.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP`
+            : `${currency}${itemTotal.toLocaleString()}`;
+        
         const cartItem = document.createElement('div');
         cartItem.className = 'cart-item fade-in';
         cartItem.innerHTML = `
             <img src="${product.image}" alt="${product.name}" class="cart-item-image">
             <div class="cart-item-info">
                 <h3 class="cart-item-name">${product.name}</h3>
-                <p>${product.condition} - ${product.year}</p>
-                <p class="cart-item-price">${product.currency}${product.price.toLocaleString()} c/u</p>
+                <p>${product.brand || ''} ${product.condition || 'Nuevo'} - ${product.year || '2024'}</p>
+                <p class="cart-item-price">${pricePerUnit} c/u</p>
             </div>
             <div class="cart-item-controls">
                 <div class="quantity-controls">
@@ -375,39 +393,42 @@ function initCartPage() {
                 </button>
             </div>
             <div class="cart-item-total">
-                <strong>${product.currency}${itemTotal.toLocaleString()}</strong>
+                <strong>${itemTotalFormatted}</strong>
             </div>
         `;
         cartItemsContainer.appendChild(cartItem);
     });
     
-    // Actualizar resumen
+    // Actualizar resumen en pesos colombianos
     if (cartSummary) {
-        const tax = subtotal * 0.19; // 19% IVA
-        const shipping = subtotal > 1000 ? 0 : 50;
+        const tax = subtotal * 0.19; // 19% IVA Colombia
+        const shipping = subtotal > 50000 ? 0 : 15000; // Envío gratis sobre $50.000
         const total = subtotal + tax + shipping;
         
         cartSummary.innerHTML = `
             <h3>Resumen del Pedido</h3>
             <div class="summary-line">
                 <span>Subtotal:</span>
-                <span>$${subtotal.toLocaleString()}</span>
+                <span>$${subtotal.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP</span>
             </div>
             <div class="summary-line">
                 <span>IVA (19%):</span>
-                <span>$${tax.toLocaleString()}</span>
+                <span>$${tax.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP</span>
             </div>
             <div class="summary-line">
                 <span>Envío:</span>
-                <span>${shipping === 0 ? 'Gratis' : '$' + shipping}</span>
+                <span>${shipping === 0 ? '¡Gratis!' : '$' + shipping.toLocaleString('es-CO') + ' COP'}</span>
             </div>
             <div class="summary-line summary-total">
-                <span>Total:</span>
-                <span>$${total.toLocaleString()}</span>
+                <span><strong>Total:</strong></span>
+                <span><strong>$${total.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP</strong></span>
             </div>
             <button class="btn-primary" onclick="checkout()">
                 <i class="fas fa-credit-card"></i> Proceder al Pago
             </button>
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                <i class="fas fa-truck"></i> Envío gratis en compras superiores a $50.000 COP
+            </p>
         `;
     }
     
