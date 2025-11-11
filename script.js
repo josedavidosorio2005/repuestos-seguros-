@@ -12,9 +12,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ===== Carga de Datos desde JSON =====
 async function loadData() {
     try {
-        const response = await fetch('data.json');
-        data = await response.json();
-        console.log('Datos cargados:', data);
+        // Primero intentar cargar desde localStorage (si el admin modificó productos)
+        const localProducts = localStorage.getItem('products');
+        
+        if (localProducts) {
+            // Usar productos del admin
+            data = {
+                products: JSON.parse(localProducts)
+            };
+            console.log('✅ Datos cargados desde Admin:', data.products.length, 'productos');
+        } else {
+            // Cargar desde data.json por defecto
+            const response = await fetch('data.json');
+            data = await response.json();
+            console.log('✅ Datos cargados desde data.json:', data.products.length, 'productos');
+        }
     } catch (error) {
         console.error('Error al cargar datos:', error);
         showError('No se pudieron cargar los datos. Por favor, recarga la página.');
