@@ -397,9 +397,12 @@ function verifyCode(code) {
     // ⚡ IMPORTANTE: Recargar datos de localStorage para tener la información más reciente
     reloadStolenParts();
     
+    // 🔍 DEBUG: Mostrar contenido RAW de localStorage
+    const rawData = localStorage.getItem('stolenParts');
     console.log('═══════════════════════════════════');
     console.log('🔍 VERIFICACIÓN DE CÓDIGO');
     console.log('═══════════════════════════════════');
+    console.log('💾 Datos RAW de localStorage:', rawData);
     console.log('📝 Código a verificar:', code);
     console.log('📊 Total de reportes en BD:', stolenParts.length);
     
@@ -411,24 +414,42 @@ function verifyCode(code) {
         });
     }
     
-    // Limpiar el código (remover espacios)
-    const cleanCode = code.trim();
+    // Limpiar el código (remover espacios, saltos de línea, etc.)
+    const cleanCode = code.trim().replace(/[\r\n\t]/g, '');
     console.log('🧹 Código limpio:', cleanCode);
+    console.log('   Longitud:', cleanCode.length, 'caracteres');
+    console.log('   Primeros 20 chars:', cleanCode.substring(0, 20));
     
-    // Buscar coincidencia exacta
-    let stolenPart = stolenParts.find(part => part.id === cleanCode);
+    // Buscar coincidencia exacta con comparación detallada
+    console.log('\n🔍 Comparando con cada reporte:');
+    let stolenPart = null;
     
-    // Si no se encuentra, intentar búsqueda flexible
-    if (!stolenPart && stolenParts.length > 0) {
-        console.log('⚠️ No encontrado con búsqueda exacta, probando búsqueda flexible...');
-        stolenPart = stolenParts.find(part => 
-            part.id.toLowerCase() === cleanCode.toLowerCase() ||
-            part.id.includes(cleanCode) ||
-            cleanCode.includes(part.id)
-        );
-        if (stolenPart) {
-            console.log('✅ Encontrado con búsqueda flexible');
+    for (let i = 0; i < stolenParts.length; i++) {
+        const part = stolenParts[i];
+        const partIdClean = part.id.trim().replace(/[\r\n\t]/g, '');
+        
+        console.log(`\n  Reporte ${i + 1}:`);
+        console.log(`    DB ID: "${partIdClean}"`);
+        console.log(`    QR ID: "${cleanCode}"`);
+        console.log(`    Longitud DB: ${partIdClean.length} | Longitud QR: ${cleanCode.length}`);
+        console.log(`    ¿Son iguales? ${partIdClean === cleanCode ? '✅ SÍ' : '❌ NO'}`);
+        
+        if (partIdClean === cleanCode) {
+            console.log(`    🎯 ¡COINCIDENCIA ENCONTRADA!`);
+            stolenPart = part;
+            break;
         }
+        
+        // Comparación flexible
+        if (partIdClean.toLowerCase() === cleanCode.toLowerCase()) {
+            console.log(`    🔄 Coincide (case-insensitive)`);
+            stolenPart = part;
+            break;
+        }
+    }
+    
+    if (!stolenPart) {
+        console.log('\n❌ NO se encontró coincidencia con ningún reporte');
     }
     
     const resultContent = document.getElementById('resultContent');
@@ -673,11 +694,80 @@ function updateLastUpdateIndicator() {
     }
 }
 
+// ===== FUNCIÓN DE DIAGNÓSTICO COMPLETO =====
+window.diagnosticoCompleto = function() {
+    console.clear();
+    console.log('═══════════════════════════════════════════════════');
+    console.log('🔧 DIAGNÓSTICO COMPLETO DEL SISTEMA ANTI-ROBO');
+    console.log('═══════════════════════════════════════════════════');
+    
+    // 1. Verificar localStorage
+    const rawData = localStorage.getItem('stolenParts');
+    console.log('\n1️⃣ DATOS EN LOCALSTORAGE:');
+    console.log('   Raw data existe:', rawData !== null);
+    console.log('   Longitud:', rawData ? rawData.length : 0, 'caracteres');
+    
+    if (rawData) {
+        console.log('   Primeros 200 caracteres:', rawData.substring(0, 200));
+        try {
+            const parsed = JSON.parse(rawData);
+            console.log('   ✅ JSON VÁLIDO - Total reportes:', parsed.length);
+            console.log('\n   📋 LISTA DE REPORTES:');
+            parsed.forEach((part, i) => {
+                console.log(`   ${i + 1}. ID: "${part.id}"`);
+                console.log(`      Parte: ${part.part.name}`);
+                console.log(`      Marca: ${part.part.brand}`);
+                console.log(`      Fecha: ${new Date(part.reportDate).toLocaleString('es-ES')}`);
+                console.log('   ---');
+            });
+        } catch (e) {
+            console.log('   ❌ ERROR al parsear JSON:', e.message);
+        }
+    } else {
+        console.log('   ❌ localStorage está VACÍO - NO hay reportes guardados');
+    }
+    
+    // 2. Verificar variable en memoria
+    console.log('\n2️⃣ VARIABLE EN MEMORIA (stolenParts):');
+    console.log('   Total en memoria:', stolenParts.length);
+    if (stolenParts.length > 0) {
+        stolenParts.forEach((part, i) => {
+            console.log(`   ${i + 1}. ID: "${part.id}" | Parte: ${part.part.name}`);
+        });
+    } else {
+        console.log('   ⚠️ Array vacío en memoria');
+    }
+    
+    // 3. Verificar librerías
+    console.log('\n3️⃣ LIBRERÍAS CARGADAS:');
+    console.log('   QRCode.js:', typeof QRCode !== 'undefined' ? '✅ Cargada' : '❌ NO cargada');
+    console.log('   Html5Qrcode:', typeof Html5Qrcode !== 'undefined' ? '✅ Cargada' : '❌ NO cargada');
+    
+    // 4. Instrucciones de prueba
+    console.log('\n4️⃣ PRUEBA MANUAL:');
+    console.log('   Para verificar un código específico, ejecuta:');
+    console.log('   verifyCode("STOLEN-1234567890")');
+    console.log('   (reemplaza con tu código real)');
+    
+    console.log('\n═══════════════════════════════════════════════════');
+    console.log('✅ Diagnóstico completado');
+    console.log('💡 Copia esta información para análisis');
+    console.log('═══════════════════════════════════════════════════\n');
+    
+    return {
+        localStorage: rawData !== null,
+        totalReportes: stolenParts.length,
+        qrCodeLib: typeof QRCode !== 'undefined',
+        html5QrcodeLib: typeof Html5Qrcode !== 'undefined'
+    };
+};
+
 // Exportar funciones para uso en otros archivos
 window.stolenPartsSystem = {
     checkIfStolen,
     verifyCode,
     getStolenParts: () => stolenParts,
     reloadData: reloadStolenParts,
-    updateReports: loadRecentReports
+    updateReports: loadRecentReports,
+    diagnostico: window.diagnosticoCompleto
 };
