@@ -7,7 +7,7 @@ const defaultProducts = [
         name: 'Kit de Pastillas de Freno Delanteras',
         price: 85000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Pastillas+Freno',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_969411-MCO31299116269_062019-O.webp',
         description: 'Pastillas de freno de alta calidad para motos deportivas y de trabajo',
         stock: 15,
         condition: 'Nuevo',
@@ -21,7 +21,7 @@ const defaultProducts = [
         name: 'Aceite Motor Sintético 10W-40 (1L)',
         price: 45000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Aceite+Sintetico',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_616669-MCO73396926265_122023-O.webp',
         description: 'Aceite sintético premium para motor de moto, protección total',
         stock: 25,
         condition: 'Nuevo',
@@ -35,7 +35,7 @@ const defaultProducts = [
         name: 'Cadena de Transmisión 520 x 120',
         price: 120000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Cadena+520',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_784790-MCO74630704619_022024-O.webp',
         description: 'Cadena reforzada 520, compatible con mayoría de motos',
         stock: 12,
         condition: 'Nuevo',
@@ -49,7 +49,7 @@ const defaultProducts = [
         name: 'Batería 12V 7Ah (YTX7A-BS)',
         price: 95000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Bateria+Moto',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_627452-MCO70779684473_072023-O.webp',
         description: 'Batería de gel, libre de mantenimiento, alta durabilidad',
         stock: 8,
         condition: 'Nuevo',
@@ -63,7 +63,7 @@ const defaultProducts = [
         name: 'Escape Deportivo Universal',
         price: 280000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Escape+Deportivo',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_989607-MCO52365826751_112022-O.webp',
         description: 'Escape deportivo en acero, mejora sonido y rendimiento',
         stock: 5,
         condition: 'Nuevo',
@@ -77,7 +77,7 @@ const defaultProducts = [
         name: 'Amortiguadores Traseros 340mm',
         price: 320000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Amortiguadores',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_786047-MCO75167536734_032024-O.webp',
         description: 'Par de amortiguadores traseros con resorte ajustable',
         stock: 6,
         condition: 'Nuevo',
@@ -91,7 +91,7 @@ const defaultProducts = [
         name: 'Kit de Embrague Completo',
         price: 180000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Kit+Embrague',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_715311-MCO74906798746_032024-O.webp',
         description: 'Kit completo: discos, separadores y resortes',
         stock: 10,
         condition: 'Nuevo',
@@ -104,7 +104,7 @@ const defaultProducts = [
         name: 'Filtro de Aire Esponja',
         price: 35000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Filtro+Aire',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_651821-MCO70640916974_072023-O.webp',
         description: 'Filtro de aire de alto flujo, lavable y reutilizable',
         stock: 20,
         condition: 'Nuevo',
@@ -117,7 +117,7 @@ const defaultProducts = [
         name: 'Bombillo LED H4 para Faro',
         price: 55000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Bombillo+LED',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_783513-MCO72926045936_112023-O.webp',
         description: 'Bombillo LED ultra brillante 6000K luz blanca',
         stock: 15,
         condition: 'Nuevo',
@@ -130,7 +130,7 @@ const defaultProducts = [
         name: 'Guardabarros Delantero Universal',
         price: 75000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Guardabarros',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_774024-MCO74652037926_022024-O.webp',
         description: 'Guardabarros en plástico ABS, ajustable a varias motos',
         stock: 4,
         condition: 'Nuevo',
@@ -143,7 +143,7 @@ const defaultProducts = [
         name: 'Manubrios Universales 22mm',
         price: 65000,
         category: 'Accesorios',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Manubrios',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_631024-MCO73472959426_122023-O.webp',
         description: 'Manubrios en aluminio, diámetro 22mm, varios colores',
         stock: 8,
         condition: 'Nuevo',
@@ -156,7 +156,7 @@ const defaultProducts = [
         name: 'Disco de Freno Delantero 220mm',
         price: 95000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Disco+Freno',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_785490-MCO75178681922_032024-O.webp',
         description: 'Disco de freno ventilado en acero inoxidable',
         stock: 7,
         condition: 'Nuevo',
@@ -169,7 +169,7 @@ const defaultProducts = [
         name: 'Bujía NGK Estándar',
         price: 18000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Bujia+NGK',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_922065-MCO74630836643_022024-O.webp',
         description: 'Bujía de alto rendimiento, compatible con mayoría de motos',
         stock: 30,
         condition: 'Nuevo',
@@ -182,7 +182,7 @@ const defaultProducts = [
         name: 'Kit Piñón y Corona 14/42',
         price: 145000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Kit+Pinon+Corona',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_911711-MCO74630658611_022024-O.webp',
         description: 'Kit completo piñón y corona, acero templado',
         stock: 18,
         condition: 'Nuevo',
@@ -195,7 +195,7 @@ const defaultProducts = [
         name: 'Espejos Retrovisores (Par)',
         price: 42000,
         category: 'Accesorios',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Espejos',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_947838-MCO74524062858_022024-O.webp',
         description: 'Par de espejos universales rosca 10mm',
         stock: 12,
         condition: 'Nuevo',
@@ -208,7 +208,7 @@ const defaultProducts = [
         name: 'Kit Plasticos Completo',
         price: 380000,
         category: 'Universal',
-        image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Kit+Plasticos',
+        image: 'https://http2.mlstatic.com/D_NQ_NP_660950-MCO73064857773_112023-O.webp',
         description: 'Kit completo de plásticos: guardabarros, tapas laterales',
         stock: 5,
         condition: 'Nuevo',
@@ -221,13 +221,13 @@ const defaultProducts = [
 // Agregar más productos completos
 const moreProducts = [
     // Yamaha
-    { id: 17, name: 'Kit Pastillas Freno Yamaha FZ 16', price: 75000, category: 'Yamaha', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Pastillas+Yamaha+FZ', description: 'Pastillas originales para Yamaha FZ 16', stock: 12, condition: 'Nuevo', year: '2024', brand: 'Yamaha', currency: 'COP' },
-    { id: 18, name: 'Filtro Aceite Yamaha R15', price: 28000, category: 'Yamaha', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Filtro+Yamaha+R15', description: 'Filtro de aceite original Yamaha', stock: 25, condition: 'Nuevo', year: '2024', brand: 'Yamaha', currency: 'COP' },
-    { id: 19, name: 'Bujía Yamaha MT-03', price: 22000, category: 'Yamaha', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Bujia+Yamaha+MT', description: 'Bujía NGK especial para Yamaha MT', stock: 30, condition: 'Nuevo', year: '2024', brand: 'Yamaha', currency: 'COP' },
+    { id: 17, name: 'Kit Pastillas Freno Yamaha FZ 16', price: 75000, category: 'Yamaha', image: 'https://http2.mlstatic.com/D_NQ_NP_737690-MCO72845704164_112023-O.webp', description: 'Pastillas originales para Yamaha FZ 16', stock: 12, condition: 'Nuevo', year: '2024', brand: 'Yamaha', currency: 'COP' },
+    { id: 18, name: 'Filtro Aceite Yamaha R15', price: 28000, category: 'Yamaha', image: 'https://http2.mlstatic.com/D_NQ_NP_784316-MCO74906798743_032024-O.webp', description: 'Filtro de aceite original Yamaha', stock: 25, condition: 'Nuevo', year: '2024', brand: 'Yamaha', currency: 'COP' },
+    { id: 19, name: 'Bujía Yamaha MT-03', price: 22000, category: 'Yamaha', image: 'https://http2.mlstatic.com/D_NQ_NP_922065-MCO74630836643_022024-O.webp', description: 'Bujía NGK especial para Yamaha MT', stock: 30, condition: 'Nuevo', year: '2024', brand: 'Yamaha', currency: 'COP' },
     
     // Honda
-    { id: 20, name: 'Kit Embrague Honda CB 190', price: 195000, category: 'Honda', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Embrague+Honda+CB', description: 'Kit completo embrague Honda CB', stock: 8, condition: 'Nuevo', year: '2024', brand: 'Honda', currency: 'COP' },
-    { id: 21, name: 'Pastillas Freno Honda CBR 250', price: 92000, category: 'Honda', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Pastillas+Honda+CBR', description: 'Pastillas de freno deportivas Honda', stock: 15, condition: 'Nuevo', year: '2024', brand: 'Honda', currency: 'COP' },
+    { id: 20, name: 'Kit Embrague Honda CB 190', price: 195000, category: 'Honda', image: 'https://http2.mlstatic.com/D_NQ_NP_715311-MCO74906798746_032024-O.webp', description: 'Kit completo embrague Honda CB', stock: 8, condition: 'Nuevo', year: '2024', brand: 'Honda', currency: 'COP' },
+    { id: 21, name: 'Pastillas Freno Honda CBR 250', price: 92000, category: 'Honda', image: 'https://http2.mlstatic.com/D_NQ_NP_969411-MCO31299116269_062019-O.webp', description: 'Pastillas de freno deportivas Honda', stock: 15, condition: 'Nuevo', year: '2024', brand: 'Honda', currency: 'COP' },
     { id: 22, name: 'Filtro Aire Honda XR 150', price: 38000, category: 'Honda', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Filtro+Honda+XR', description: 'Filtro de aire original Honda', stock: 20, condition: 'Nuevo', year: '2024', brand: 'Honda', currency: 'COP' },
     { id: 23, name: 'Cadena Honda Wave 110', price: 65000, category: 'Honda', image: 'https://dummyimage.com/500x500/1a1a2e/00d4ff&text=Cadena+Honda+Wave', description: 'Cadena original Honda para Wave', stock: 18, condition: 'Nuevo', year: '2024', brand: 'Honda', currency: 'COP' },
     
@@ -275,7 +275,7 @@ const moreProducts = [
 const allProducts = [...defaultProducts, ...moreProducts];
 
 // Sistema de versión para forzar actualización automática
-const PRODUCT_VERSION = '1.2.0'; // Incrementar cuando cambien las imágenes o productos
+const PRODUCT_VERSION = '2.0.0'; // Incrementar cuando cambien las imágenes o productos
 const currentVersion = localStorage.getItem('productVersion');
 
 // Verificar si necesita actualización
@@ -301,5 +301,7 @@ window.dispatchEvent(new Event('productsLoaded'));
 if (needsUpdate) {
     console.log('✨ ¡Productos actualizados exitosamente!');
 }
+
+
 
 
