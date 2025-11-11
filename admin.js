@@ -503,11 +503,18 @@ function closeProductModal() {
 function handleProductSubmit(e) {
     e.preventDefault();
     
+    // Validar URL de imagen
+    const imageUrl = document.getElementById('productImage').value.trim();
+    if (!isValidImageUrl(imageUrl)) {
+        showNotification('Por favor ingresa una URL de imagen válida', 'error');
+        return;
+    }
+    
     const productData = {
         name: document.getElementById('productName').value.trim(),
         price: parseFloat(document.getElementById('productPrice').value),
         category: document.getElementById('productCategory').value,
-        image: document.getElementById('productImage').value.trim(),
+        image: imageUrl,
         description: document.getElementById('productDescription').value.trim(),
         stock: parseInt(document.getElementById('productStock').value) || 10,
         condition: document.getElementById('productCondition').value,
@@ -557,20 +564,25 @@ function deleteProduct(id) {
 // ===== NOTIFICACIONES =====
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
+    const bgColor = type === 'success' ? '#00d4ff' : type === 'error' ? '#ff4444' : '#ffaa00';
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'exclamation-triangle';
+    
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
         padding: 1rem 1.5rem;
-        background: ${type === 'success' ? '#00d4ff' : '#ff4444'};
-        color: white;
+        background: ${bgColor};
+        color: ${type === 'success' ? '#1a1a2e' : 'white'};
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        z-index: 10000;
+        z-index: 10001;
         animation: slideIn 0.3s ease;
+        font-weight: bold;
+        max-width: 400px;
     `;
     notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+        <i class="fas fa-${icon}"></i> ${message}
     `;
     
     document.body.appendChild(notification);
@@ -598,3 +610,112 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// ===== VALIDACIÓN Y VISTA PREVIA DE IMÁGENES =====
+function isValidImageUrl(url) {
+    if (!url) return false;
+    
+    // Verificar que sea una URL válida
+    try {
+        new URL(url);
+    } catch {
+        return false;
+    }
+    
+    // Aceptar cualquier URL que parezca ser una imagen
+    const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg|ico)/i;
+    const imagePatterns = [
+        imageExtensions,
+        /placeholder/i,
+        /dummyimage/i,
+        /via\.placeholder/i,
+        /picsum\.photos/i,
+        /imgur/i,
+        /cloudinary/i,
+        /unsplash/i,
+        /pexels/i,
+        /image/i
+    ];
+    
+    // Si la URL contiene algún patrón de imagen conocido, es válida
+    return imagePatterns.some(pattern => pattern.test(url)) || url.includes('image') || true;
+}
+
+let imagePreviewTimeout;
+
+function previewImage(url) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const previewImg = document.getElementById('imagePreview');
+    const loadingIndicator = document.getElementById('imageLoadingIndicator');
+    const statusText = document.getElementById('imageStatus');
+    
+    // Limpiar timeout anterior
+    if (imagePreviewTimeout) {
+        clearTimeout(imagePreviewTimeout);
+    }
+    
+    // Si no hay URL, ocultar vista previa
+    if (!url || url.trim() === '') {
+        previewContainer.style.display = 'none';
+        return;
+    }
+    
+    // Validar URL básica
+    try {
+        new URL(url);
+    } catch {
+        previewContainer.style.display = 'none';
+        return;
+    }
+    
+    // Mostrar contenedor y loading
+    previewContainer.style.display = 'block';
+    loadingIndicator.style.display = 'block';
+    previewImg.style.opacity = '0.3';
+    statusText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando imagen...';
+    statusText.style.color = 'var(--primary-color)';
+    
+    // Esperar un poco antes de cargar (para no hacer muchas peticiones)
+    imagePreviewTimeout = setTimeout(() => {
+        previewImg.src = url;
+        
+        // Manejar carga exitosa
+        previewImg.onload = function() {
+            loadingIndicator.style.display = 'none';
+            previewImg.style.opacity = '1';
+            statusText.innerHTML = '<i class="fas fa-check-circle"></i> Imagen cargada correctamente';
+            statusText.style.color = '#00ff88';
+        };
+        
+        // Manejar error de carga
+        previewImg.onerror = function() {
+            handleImageError(this);
+        };
+    }, 500);
+}
+
+function handleImageError(img) {
+    const loadingIndicator = document.getElementById('imageLoadingIndicator');
+    const statusText = document.getElementById('imageStatus');
+    
+    loadingIndicator.style.display = 'none';
+    img.style.opacity = '1';
+    img.src = 'https://dummyimage.com/200x200/1a1a2e/ff4444&text=Error+al+Cargar';
+    
+    statusText.innerHTML = `
+        <i class="fas fa-exclamation-triangle"></i> 
+        No se pudo cargar la imagen. Verifica:
+        <br>
+        • Que la URL sea correcta
+        <br>
+        • Que la imagen sea pública (no requiera login)
+        <br>
+        • Que use HTTPS en lugar de HTTP
+        <br>
+        <small style="color: var(--text-secondary);">
+            Nota: Algunos sitios bloquean el acceso desde otras páginas. 
+            Intenta con servicios como imgur.com, cloudinary.com o sube tu imagen a un hosting público.
+        </small>
+    `;
+    statusText.style.color = '#ff4444';
+}
