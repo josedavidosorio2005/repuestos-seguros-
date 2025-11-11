@@ -9,27 +9,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateCartCount();
 });
 
+// Escuchar cuando init-products.js cargue los productos
+window.addEventListener('productsLoaded', async () => {
+    console.log('🔄 Recargando datos después de inicialización de productos...');
+    await loadData();
+    initializeApp();
+});
+
 // ===== Carga de Datos desde JSON =====
 async function loadData() {
     try {
-        // Primero intentar cargar desde localStorage (si el admin modificó productos)
+        // Cargar productos desde localStorage
         const localProducts = localStorage.getItem('products');
         
         if (localProducts) {
-            // Usar productos del admin
+            // Usar productos del localStorage
             data = {
-                products: JSON.parse(localProducts)
+                products: JSON.parse(localProducts),
+                categories: [] // Ya no usamos categories, ahora son marcas
             };
-            console.log('✅ Datos cargados desde Admin:', data.products.length, 'productos');
+            console.log('✅ Datos cargados desde localStorage:', data.products.length, 'productos');
         } else {
-            // Cargar desde data.json por defecto
-            const response = await fetch('data.json');
-            data = await response.json();
-            console.log('✅ Datos cargados desde data.json:', data.products.length, 'productos');
+            // Si no hay productos en localStorage, mostrar mensaje
+            console.warn('⚠️ No hay productos en localStorage. Espera a que init-products.js los cargue.');
+            data = {
+                products: [],
+                categories: []
+            };
         }
     } catch (error) {
-        console.error('Error al cargar datos:', error);
-        showError('No se pudieron cargar los datos. Por favor, recarga la página.');
+        console.error('❌ Error al cargar datos:', error);
+        data = {
+            products: [],
+            categories: []
+        };
     }
 }
 
@@ -62,23 +75,41 @@ function initHomePage() {
     loadFooterCategories();
 }
 
-// Cargar categorías
+// Cargar categorías (ahora son marcas)
 function loadCategories() {
     const categoriesGrid = document.getElementById('categoriesGrid');
-    if (!categoriesGrid || !data) return;
+    if (!categoriesGrid || !data || !data.products) return;
 
     categoriesGrid.innerHTML = '';
     
-    data.categories.forEach(category => {
+    // Obtener marcas únicas de los productos
+    const brands = [...new Set(data.products.map(p => p.category))].filter(Boolean).sort();
+    
+    // Iconos para cada marca
+    const brandIcons = {
+        'Yamaha': 'fas fa-motorcycle',
+        'Honda': 'fas fa-motorcycle',
+        'Suzuki': 'fas fa-motorcycle',
+        'Kawasaki': 'fas fa-motorcycle',
+        'KTM': 'fas fa-motorcycle',
+        'Bajaj': 'fas fa-motorcycle',
+        'TVS': 'fas fa-motorcycle',
+        'AKT': 'fas fa-motorcycle',
+        'Universal': 'fas fa-cog',
+        'Accesorios': 'fas fa-helmet-safety'
+    };
+    
+    brands.forEach(brand => {
+        const productCount = data.products.filter(p => p.category === brand).length;
         const categoryCard = document.createElement('div');
         categoryCard.className = 'category-card fade-in';
         categoryCard.innerHTML = `
-            <i class="${category.icon}"></i>
-            <h3>${category.name}</h3>
-            <p>${category.description}</p>
+            <i class="${brandIcons[brand] || 'fas fa-box'}"></i>
+            <h3>${brand}</h3>
+            <p>${productCount} producto${productCount !== 1 ? 's' : ''} disponible${productCount !== 1 ? 's' : ''}</p>
         `;
         categoryCard.addEventListener('click', () => {
-            window.location.href = `productos.html?category=${category.id}`;
+            window.location.href = `productos.html?category=${encodeURIComponent(brand)}`;
         });
         categoriesGrid.appendChild(categoryCard);
     });
@@ -106,16 +137,19 @@ function loadFeaturedProducts() {
     });
 }
 
-// Cargar categorías en el footer
+// Cargar categorías en el footer (ahora marcas)
 function loadFooterCategories() {
     const footerCategories = document.getElementById('footerCategories');
-    if (!footerCategories || !data) return;
+    if (!footerCategories || !data || !data.products) return;
 
     footerCategories.innerHTML = '';
     
-    data.categories.slice(0, 4).forEach(category => {
+    // Obtener las primeras 4 marcas únicas
+    const brands = [...new Set(data.products.map(p => p.category))].filter(Boolean).sort().slice(0, 4);
+    
+    brands.forEach(brand => {
         const li = document.createElement('li');
-        li.innerHTML = `<a href="productos.html?category=${category.id}">${category.name}</a>`;
+        li.innerHTML = `<a href="productos.html?category=${encodeURIComponent(brand)}">${brand}</a>`;
         footerCategories.appendChild(li);
     });
 }
@@ -130,7 +164,22 @@ function initProductsPage() {
 // Cargar todos los productos
 function loadAllProducts(filterCategory = null, searchTerm = '') {
     const productsGrid = document.getElementById('productsGrid');
-    if (!productsGrid || !data) return;
+    if (!productsGrid) return;
+    
+    // Verificar si hay datos
+    if (!data || !data.products || data.products.length === 0) {
+        productsGrid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
+                <i class="fas fa-box-open" style="font-size: 5rem; color: var(--text-secondary); opacity: 0.3; margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Cargando catálogo...</h3>
+                <p style="color: var(--text-secondary);">Espera un momento mientras cargamos los productos</p>
+                <div style="margin-top: 2rem;">
+                    <div class="loading-spinner" style="border: 3px solid rgba(0, 212, 255, 0.1); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                </div>
+            </div>
+        `;
+        return;
+    }
 
     productsGrid.innerHTML = '';
     
@@ -154,10 +203,10 @@ function loadAllProducts(filterCategory = null, searchTerm = '') {
     // Mostrar productos
     if (filteredProducts.length === 0) {
         productsGrid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1;">
-                <i class="fas fa-box-open"></i>
-                <h3>No se encontraron productos</h3>
-                <p>Intenta con otros filtros o búsqueda</p>
+            <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
+                <i class="fas fa-search" style="font-size: 4rem; color: var(--text-secondary); opacity: 0.3; margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">No se encontraron productos</h3>
+                <p style="color: var(--text-secondary);">Intenta con otros filtros o términos de búsqueda</p>
             </div>
         `;
         return;
