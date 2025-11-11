@@ -1,6 +1,31 @@
 // ===== Sistema de Partes Robadas =====
 let stolenParts = JSON.parse(localStorage.getItem('stolenParts')) || [];
 
+// ===== Sincronización en Tiempo Real =====
+// Escuchar cambios en localStorage desde otras pestañas/ventanas
+window.addEventListener('storage', (e) => {
+    if (e.key === 'stolenParts') {
+        console.log('🔄 Detectado cambio en la base de datos');
+        // Recargar datos
+        stolenParts = JSON.parse(e.newValue) || [];
+        
+        // Si estamos en la página de verificación, actualizar reportes recientes
+        const currentPage = window.location.pathname.split('/').pop();
+        if (currentPage === 'verificar-qr.html') {
+            loadRecentReports();
+            showNotification('Base de datos actualizada', 'success');
+        }
+    }
+});
+
+// Función para recargar datos de localStorage
+function reloadStolenParts() {
+    const data = localStorage.getItem('stolenParts');
+    stolenParts = data ? JSON.parse(data) : [];
+    console.log('📊 Datos recargados:', stolenParts.length, 'reportes');
+    return stolenParts;
+}
+
 // ===== Inicialización para páginas de robo =====
 document.addEventListener('DOMContentLoaded', () => {
     const currentPage = window.location.pathname.split('/').pop();
@@ -10,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (currentPage === 'verificar-qr.html') {
         initVerifyPage();
     }
+    
+    // Mostrar cantidad de reportes en consola
+    console.log('📊 Total de reportes en sistema:', stolenParts.length);
 });
 
 // ===== Página de Reporte =====
@@ -51,9 +79,12 @@ function handleReportSubmit(e) {
         verified: false
     };
     
-    // Guardar en localStorage
+    // Guardar en localStorage con actualización en tiempo real
     stolenParts.push(reportData);
     localStorage.setItem('stolenParts', JSON.stringify(stolenParts));
+    
+    console.log('✅ Parte registrada:', reportData.id);
+    console.log('📊 Total de reportes ahora:', stolenParts.length);
     
     // Generar y mostrar QR
     generateQRCode(reportData);
@@ -63,6 +94,11 @@ function handleReportSubmit(e) {
     
     // Mostrar notificación
     showNotification('¡Parte registrada exitosamente! Se ha generado el código QR.', 'success');
+    
+    // Disparar evento personalizado para actualización en tiempo real
+    window.dispatchEvent(new CustomEvent('stolenPartAdded', { 
+        detail: reportData 
+    }));
 }
 
 function generateQRCode(reportData) {
@@ -196,6 +232,7 @@ function downloadQR() {
 
 // ===== Página de Verificación =====
 function initVerifyPage() {
+    // Cargar reportes recientes
     loadRecentReports();
     
     // Verificar si hay un código en la URL
@@ -204,6 +241,16 @@ function initVerifyPage() {
     if (code) {
         verifyCode(code);
     }
+    
+    // Auto-actualizar reportes cada 5 segundos si la página está activa
+    setInterval(() => {
+        if (!document.hidden) {
+            loadRecentReports();
+        }
+    }, 5000);
+    
+    console.log('✅ Sistema de verificación inicializado');
+    console.log('🔄 Auto-actualización cada 5 segundos activada');
 }
 
 function showScanSection() {
@@ -336,8 +383,20 @@ function processQRData(qrText) {
 function verifyCode(code) {
     hideAllSections();
     
+    // ⚡ IMPORTANTE: Recargar datos de localStorage para tener la información más reciente
+    reloadStolenParts();
+    
+    console.log('🔍 Verificando código:', code);
+    console.log('📊 Buscando en', stolenParts.length, 'reportes');
+    
     const stolenPart = stolenParts.find(part => part.id === code);
     const resultContent = document.getElementById('resultContent');
+    
+    if (stolenPart) {
+        console.log('🚨 ALERTA: Parte encontrada en base de datos de robos');
+    } else {
+        console.log('✅ Parte NO encontrada en base de datos (está limpia)');
+    }
     
     if (stolenPart) {
         // Parte encontrada - ESTÁ ROBADA
@@ -457,6 +516,14 @@ function loadRecentReports() {
     const recentReportsContainer = document.getElementById('recentReports');
     if (!recentReportsContainer) return;
     
+    // ⚡ ACTUALIZACIÓN EN TIEMPO REAL: Recargar datos más recientes
+    reloadStolenParts();
+    
+    // Actualizar indicador de tiempo
+    updateLastUpdateIndicator();
+    
+    console.log('🔄 Actualizando reportes recientes. Total:', stolenParts.length);
+    
     if (stolenParts.length === 0) {
         recentReportsContainer.innerHTML = `
             <div class="empty-state" style="grid-column: 1/-1;">
@@ -473,7 +540,7 @@ function loadRecentReports() {
     
     recentReportsContainer.innerHTML = '';
     
-    // Mostrar los últimos 6 reportes
+    // Mostrar los últimos 6 reportes (más recientes primero)
     const recentParts = stolenParts.slice(-6).reverse();
     
     recentParts.forEach(stolenPart => {
@@ -541,9 +608,31 @@ function checkIfStolen(productName, productBrand) {
     );
 }
 
+// ===== Indicador de Última Actualización =====
+function updateLastUpdateIndicator() {
+    const indicator = document.getElementById('lastUpdate');
+    if (indicator) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('es-ES', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        indicator.innerHTML = `⚡ Actualizado: ${timeString}`;
+        
+        // Animación de actualización
+        indicator.style.opacity = '0.5';
+        setTimeout(() => {
+            indicator.style.opacity = '1';
+        }, 200);
+    }
+}
+
 // Exportar funciones para uso en otros archivos
 window.stolenPartsSystem = {
     checkIfStolen,
     verifyCode,
-    getStolenParts: () => stolenParts
+    getStolenParts: () => stolenParts,
+    reloadData: reloadStolenParts,
+    updateReports: loadRecentReports
 };
