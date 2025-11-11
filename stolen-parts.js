@@ -20,15 +20,30 @@ window.addEventListener('storage', (e) => {
 
 // Función para recargar datos de localStorage
 function reloadStolenParts() {
-    const data = localStorage.getItem('stolenParts');
-    stolenParts = data ? JSON.parse(data) : [];
-    console.log('📊 Datos recargados:', stolenParts.length, 'reportes');
+    try {
+        const data = localStorage.getItem('stolenParts');
+        if (data) {
+            stolenParts = JSON.parse(data);
+            console.log('✅ Datos recargados:', stolenParts.length, 'reportes');
+        } else {
+            stolenParts = [];
+            console.log('⚠️ No hay reportes guardados (localStorage vacío)');
+        }
+    } catch (e) {
+        console.error('❌ Error al cargar datos:', e);
+        stolenParts = [];
+    }
     return stolenParts;
 }
 
 // ===== Inicialización para páginas de robo =====
 document.addEventListener('DOMContentLoaded', () => {
+    // 🔄 SIEMPRE recargar datos al inicio
+    reloadStolenParts();
+    
     const currentPage = window.location.pathname.split('/').pop();
+    console.log('📄 Página actual:', currentPage);
+    console.log('📊 Total de reportes cargados:', stolenParts.length);
     
     if (currentPage === 'reporte-robo.html') {
         initReportPage();
@@ -36,8 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
         initVerifyPage();
     }
     
-    // Mostrar cantidad de reportes en consola
-    console.log('📊 Total de reportes en sistema:', stolenParts.length);
+    // Mostrar resumen en consola
+    if (stolenParts.length > 0) {
+        console.log('📋 Reportes disponibles:');
+        stolenParts.forEach((part, i) => {
+            console.log(`  ${i + 1}. ${part.id} - ${part.part.name}`);
+        });
+    } else {
+        console.log('� No hay reportes. Ve a reporte-robo.html para crear uno.');
+    }
 });
 
 // ===== Página de Reporte =====
@@ -79,12 +101,16 @@ function handleReportSubmit(e) {
         verified: false
     };
     
+    // 🔄 Recargar primero para evitar sobrescribir datos
+    reloadStolenParts();
+    
     // Guardar en localStorage con actualización en tiempo real
     stolenParts.push(reportData);
     localStorage.setItem('stolenParts', JSON.stringify(stolenParts));
     
     console.log('✅ Parte registrada:', reportData.id);
     console.log('📊 Total de reportes ahora:', stolenParts.length);
+    console.log('💾 Guardado en localStorage correctamente');
     
     // Generar y mostrar QR
     generateQRCode(reportData);
@@ -232,6 +258,9 @@ function downloadQR() {
 
 // ===== Página de Verificación =====
 function initVerifyPage() {
+    // 🔄 Actualizar contador de reportes
+    updateReportCount();
+    
     // Cargar reportes recientes
     loadRecentReports();
     
@@ -245,12 +274,23 @@ function initVerifyPage() {
     // Auto-actualizar reportes cada 5 segundos si la página está activa
     setInterval(() => {
         if (!document.hidden) {
+            reloadStolenParts();
+            updateReportCount();
             loadRecentReports();
         }
     }, 5000);
     
     console.log('✅ Sistema de verificación inicializado');
     console.log('🔄 Auto-actualización cada 5 segundos activada');
+}
+
+// Actualizar contador visible de reportes
+function updateReportCount() {
+    const countElement = document.getElementById('reportCount');
+    if (countElement) {
+        countElement.textContent = stolenParts.length;
+        countElement.style.color = stolenParts.length > 0 ? 'var(--success-color)' : 'var(--text-secondary)';
+    }
 }
 
 function showScanSection() {
@@ -368,26 +408,30 @@ function verifyManualCode(e) {
 function processQRData(qrText) {
     console.log('📱 Datos del QR recibidos:', qrText);
     
-    // Limpiar el texto (remover espacios y saltos de línea)
-    const cleanText = qrText.trim();
+    // 🔄 FORZAR recarga de datos ANTES de procesar
+    reloadStolenParts();
+    console.log('🔄 Datos recargados - Total reportes:', stolenParts.length);
+    
+    // Limpiar el texto de forma agresiva
+    let cleanText = qrText.trim().replace(/[\r\n\t\s]/g, '');
+    console.log('🧹 Texto limpio:', cleanText);
     
     try {
         // Intentar parsear como JSON primero
-        const data = JSON.parse(cleanText);
+        const data = JSON.parse(qrText.trim());
         console.log('📋 QR parseado como JSON:', data);
         
         if (data.id) {
-            console.log('✅ ID encontrado en JSON:', data.id);
-            verifyCode(data.id);
-        } else {
-            console.warn('⚠️ JSON sin campo ID');
-            showNotification('Código QR no válido - falta ID', 'warning');
+            cleanText = data.id.trim().replace(/[\r\n\t\s]/g, '');
+            console.log('✅ ID extraído del JSON:', cleanText);
         }
     } catch (e) {
-        // Si no es JSON, es un código directo (como debe ser)
-        console.log('📝 QR es texto simple (correcto):', cleanText);
-        verifyCode(cleanText);
+        // Si no es JSON, es un código directo (correcto)
+        console.log('📝 QR es texto simple (correcto)');
     }
+    
+    // Verificar con el código limpio
+    verifyCode(cleanText);
 }
 
 // ===== Verificar Código =====
@@ -414,42 +458,42 @@ function verifyCode(code) {
         });
     }
     
-    // Limpiar el código (remover espacios, saltos de línea, etc.)
-    const cleanCode = code.trim().replace(/[\r\n\t]/g, '');
+    // Limpiar el código de forma agresiva (sin NINGÚN espacio)
+    const cleanCode = code.toString().trim().replace(/[\r\n\t\s]/g, '');
     console.log('🧹 Código limpio:', cleanCode);
     console.log('   Longitud:', cleanCode.length, 'caracteres');
-    console.log('   Primeros 20 chars:', cleanCode.substring(0, 20));
     
-    // Buscar coincidencia exacta con comparación detallada
-    console.log('\n🔍 Comparando con cada reporte:');
+    if (stolenParts.length === 0) {
+        console.log('⚠️ NO hay reportes en la base de datos');
+        console.log('💡 Asegúrate de haber reportado partes primero');
+    }
+    
+    // Buscar coincidencia con limpieza agresiva en ambos lados
+    console.log('\n🔍 Buscando coincidencias...');
     let stolenPart = null;
     
     for (let i = 0; i < stolenParts.length; i++) {
         const part = stolenParts[i];
-        const partIdClean = part.id.trim().replace(/[\r\n\t]/g, '');
+        // Limpiar ID de base de datos también
+        const partIdClean = part.id.toString().trim().replace(/[\r\n\t\s]/g, '');
         
-        console.log(`\n  Reporte ${i + 1}:`);
-        console.log(`    DB ID: "${partIdClean}"`);
-        console.log(`    QR ID: "${cleanCode}"`);
-        console.log(`    Longitud DB: ${partIdClean.length} | Longitud QR: ${cleanCode.length}`);
-        console.log(`    ¿Son iguales? ${partIdClean === cleanCode ? '✅ SÍ' : '❌ NO'}`);
-        
+        // Comparación estricta sin espacios
         if (partIdClean === cleanCode) {
-            console.log(`    🎯 ¡COINCIDENCIA ENCONTRADA!`);
-            stolenPart = part;
-            break;
-        }
-        
-        // Comparación flexible
-        if (partIdClean.toLowerCase() === cleanCode.toLowerCase()) {
-            console.log(`    🔄 Coincide (case-insensitive)`);
+            console.log(`✅ ENCONTRADO: Reporte ${i + 1} - ${part.part.name}`);
             stolenPart = part;
             break;
         }
     }
     
     if (!stolenPart) {
-        console.log('\n❌ NO se encontró coincidencia con ningún reporte');
+        console.log('❌ NO encontrado en base de datos');
+        if (stolenParts.length > 0) {
+            console.log('📋 IDs disponibles:');
+            stolenParts.forEach((p, i) => {
+                const pId = p.id.toString().trim().replace(/[\r\n\t\s]/g, '');
+                console.log(`   ${i + 1}. ${pId}`);
+            });
+        }
     }
     
     const resultContent = document.getElementById('resultContent');
