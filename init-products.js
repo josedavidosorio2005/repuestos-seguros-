@@ -274,15 +274,32 @@ const moreProducts = [
 // Combinar todos los productos
 const allProducts = [...defaultProducts, ...moreProducts];
 
-// Guardar productos en localStorage - SIEMPRE actualizar para asegurar que estén disponibles
-const forceUpdate = true; // Mantener en true para asegurar que los productos se carguen
+// Sistema de versión para forzar actualización automática
+const PRODUCT_VERSION = '1.2.0'; // Incrementar cuando cambien las imágenes o productos
+const currentVersion = localStorage.getItem('productVersion');
 
+// Verificar si necesita actualización
+const needsUpdate = currentVersion !== PRODUCT_VERSION;
+
+if (needsUpdate) {
+    console.log('🔄 Nueva versión de productos detectada. Actualizando...');
+    console.log('📦 Versión anterior:', currentVersion || 'ninguna');
+    console.log('📦 Nueva versión:', PRODUCT_VERSION);
+}
+
+// SIEMPRE actualizar productos en localStorage
 console.log('🔄 Inicializando catálogo de productos...');
 localStorage.setItem('products', JSON.stringify(allProducts));
+localStorage.setItem('productVersion', PRODUCT_VERSION);
 console.log('✅ Catálogo completo inicializado:', allProducts.length, 'productos');
 console.log('📦 Por marcas: Yamaha, Honda, Suzuki, Kawasaki, KTM, Bajaj, TVS, AKT, Universal, Accesorios');
 
 // Disparar evento para que script.js recargue los datos
 window.dispatchEvent(new Event('productsLoaded'));
+
+// Mensaje de confirmación para el usuario
+if (needsUpdate) {
+    console.log('✨ ¡Productos actualizados exitosamente!');
+}
 
 
