@@ -321,25 +321,108 @@ function loadProductsList() {
     }
     
     container.innerHTML = products.map(product => `
-        <div class="admin-product-card" style="background: var(--card-bg); border-radius: 10px; padding: 1.5rem; display: flex; gap: 1.5rem; align-items: center;">
-            <img src="${product.image}" alt="${product.name}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
-            
-            <div style="flex: 1;">
-                <h3 style="margin: 0 0 0.5rem 0; color: var(--primary-color);">${product.name}</h3>
-                <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
-                    <span style="background: rgba(0,212,255,0.1); padding: 0.2rem 0.8rem; border-radius: 20px; margin-right: 0.5rem;">
-                        ${getCategoryName(product.category)}
-                    </span>
-                    <span style="font-size: 1.3rem; color: var(--success-color); font-weight: bold;">$${product.price.toFixed(2)}</span>
-                </p>
-                ${product.description ? `<p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">${product.description}</p>` : ''}
+        <div class="admin-product-card" style="
+            background: var(--card-bg); 
+            border-radius: 15px; 
+            padding: 1.5rem; 
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 1.5rem; 
+            align-items: center;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        " onmouseover="this.style.borderColor='#00d4ff'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(0,212,255,0.3)'" onmouseout="this.style.borderColor='rgba(0,212,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            <div style="position: relative;">
+                <img src="${product.image}" alt="${product.name}" style="
+                    width: 120px; 
+                    height: 120px; 
+                    object-fit: cover; 
+                    border-radius: 10px;
+                    border: 2px solid rgba(0, 212, 255, 0.3);
+                " onerror="this.src='https://placehold.co/120x120/1a1a2e/00d4ff?text=Sin+Imagen'">
+                ${product.featured ? '<div style="position: absolute; top: -5px; right: -5px; background: linear-gradient(135deg, #00ff88, #00d4ff); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,255,136,0.5);"><i class="fas fa-star" style="font-size: 0.8rem; color: #1a1a2e;"></i></div>' : ''}
             </div>
             
-            <div style="display: flex; gap: 0.5rem;">
-                <button onclick="editProduct(${product.id})" class="btn" style="background: var(--primary-color); padding: 0.7rem 1.2rem;">
+            <div style="min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <h3 style="margin: 0; color: var(--primary-color); font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${product.name}</h3>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+                    <span style="
+                        background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,153,255,0.2)); 
+                        padding: 0.3rem 0.8rem; 
+                        border-radius: 20px; 
+                        font-size: 0.85rem;
+                        border: 1px solid rgba(0,212,255,0.4);
+                        color: #00d4ff;
+                    ">
+                        <i class="fas fa-motorcycle"></i> ${getCategoryName(product.category)}
+                    </span>
+                    <span style="
+                        background: linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,212,255,0.2)); 
+                        padding: 0.3rem 0.8rem; 
+                        border-radius: 20px;
+                        font-size: 1rem;
+                        border: 1px solid rgba(0,255,136,0.4);
+                        color: #00ff88;
+                        font-weight: bold;
+                    ">
+                        ${formatPrice(product.price)}
+                    </span>
+                    ${product.stock ? `<span style="
+                        padding: 0.3rem 0.8rem; 
+                        border-radius: 20px;
+                        font-size: 0.8rem;
+                        background: ${product.stock < 5 ? 'rgba(255,68,68,0.2)' : 'rgba(0,255,136,0.2)'};
+                        border: 1px solid ${product.stock < 5 ? 'rgba(255,68,68,0.4)' : 'rgba(0,255,136,0.4)'};
+                        color: ${product.stock < 5 ? '#ff4444' : '#00ff88'};
+                    ">
+                        <i class="fas fa-boxes"></i> Stock: ${product.stock}
+                    </span>` : ''}
+                </div>
+                ${product.description ? `<p style="
+                    margin: 0.5rem 0 0 0; 
+                    color: var(--text-secondary); 
+                    font-size: 0.9rem;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    line-height: 1.4;
+                ">${product.description}</p>` : ''}
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; min-width: 120px;">
+                <button onclick="editProduct(${product.id})" class="btn" style="
+                    background: linear-gradient(135deg, #00d4ff, #0099ff); 
+                    padding: 0.7rem 1rem;
+                    border: none;
+                    color: #1a1a2e;
+                    font-weight: bold;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 5px 15px rgba(0,212,255,0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                     <i class="fas fa-edit"></i> Editar
                 </button>
-                <button onclick="deleteProduct(${product.id})" class="btn" style="background: #ff4444; padding: 0.7rem 1.2rem;">
+                <button onclick="deleteProduct(${product.id})" class="btn" style="
+                    background: linear-gradient(135deg, #ff4444, #cc0000); 
+                    padding: 0.7rem 1rem;
+                    border: none;
+                    color: white;
+                    font-weight: bold;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 5px 15px rgba(255,68,68,0.5)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             </div>
@@ -357,6 +440,15 @@ function updateStatistics() {
 function getCategoryName(category) {
     // Ahora las categorías son directamente las marcas
     return category || 'Sin categoría';
+}
+
+function formatPrice(price) {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(price);
 }
 
 // ===== MODAL =====
@@ -496,3 +588,13 @@ window.onclick = function(event) {
         closeProductModal();
     }
 }
+
+// Cerrar modal con tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('productModal');
+        if (modal.style.display === 'flex') {
+            closeProductModal();
+        }
+    }
+});
