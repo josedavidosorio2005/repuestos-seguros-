@@ -366,16 +366,27 @@ function verifyManualCode(e) {
 
 // ===== Procesar Datos del QR =====
 function processQRData(qrText) {
+    console.log('📱 Datos del QR recibidos:', qrText);
+    
+    // Limpiar el texto (remover espacios y saltos de línea)
+    const cleanText = qrText.trim();
+    
     try {
-        const data = JSON.parse(qrText);
+        // Intentar parsear como JSON primero
+        const data = JSON.parse(cleanText);
+        console.log('📋 QR parseado como JSON:', data);
+        
         if (data.id) {
+            console.log('✅ ID encontrado en JSON:', data.id);
             verifyCode(data.id);
         } else {
-            showNotification('Código QR no válido', 'warning');
+            console.warn('⚠️ JSON sin campo ID');
+            showNotification('Código QR no válido - falta ID', 'warning');
         }
     } catch (e) {
-        // Si no es JSON, intentar como código directo
-        verifyCode(qrText);
+        // Si no es JSON, es un código directo (como debe ser)
+        console.log('📝 QR es texto simple (correcto):', cleanText);
+        verifyCode(cleanText);
     }
 }
 
@@ -386,17 +397,51 @@ function verifyCode(code) {
     // ⚡ IMPORTANTE: Recargar datos de localStorage para tener la información más reciente
     reloadStolenParts();
     
-    console.log('🔍 Verificando código:', code);
-    console.log('📊 Buscando en', stolenParts.length, 'reportes');
+    console.log('═══════════════════════════════════');
+    console.log('🔍 VERIFICACIÓN DE CÓDIGO');
+    console.log('═══════════════════════════════════');
+    console.log('📝 Código a verificar:', code);
+    console.log('📊 Total de reportes en BD:', stolenParts.length);
     
-    const stolenPart = stolenParts.find(part => part.id === code);
+    // Mostrar todos los códigos disponibles para comparar
+    if (stolenParts.length > 0) {
+        console.log('📋 Códigos en la base de datos:');
+        stolenParts.forEach((part, index) => {
+            console.log(`  ${index + 1}. ${part.id} - ${part.part.name}`);
+        });
+    }
+    
+    // Limpiar el código (remover espacios)
+    const cleanCode = code.trim();
+    console.log('🧹 Código limpio:', cleanCode);
+    
+    // Buscar coincidencia exacta
+    let stolenPart = stolenParts.find(part => part.id === cleanCode);
+    
+    // Si no se encuentra, intentar búsqueda flexible
+    if (!stolenPart && stolenParts.length > 0) {
+        console.log('⚠️ No encontrado con búsqueda exacta, probando búsqueda flexible...');
+        stolenPart = stolenParts.find(part => 
+            part.id.toLowerCase() === cleanCode.toLowerCase() ||
+            part.id.includes(cleanCode) ||
+            cleanCode.includes(part.id)
+        );
+        if (stolenPart) {
+            console.log('✅ Encontrado con búsqueda flexible');
+        }
+    }
+    
     const resultContent = document.getElementById('resultContent');
     
     if (stolenPart) {
-        console.log('🚨 ALERTA: Parte encontrada en base de datos de robos');
+        console.log('🚨 ¡ALERTA! Parte ENCONTRADA en base de datos');
+        console.log('📦 Datos de la parte robada:', stolenPart);
+        console.log('🔗 ID coincidente:', stolenPart.id);
     } else {
-        console.log('✅ Parte NO encontrada en base de datos (está limpia)');
+        console.log('❌ Código NO encontrado en la base de datos');
+        console.log('⚠️ La parte NO está reportada como robada');
     }
+    console.log('═══════════════════════════════════');
     
     if (stolenPart) {
         // Parte encontrada - ESTÁ ROBADA
