@@ -303,6 +303,9 @@ function createProductCard(product) {
         priceFormatted = `${currency}${parseFloat(product.price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     }
     
+    // Hacer que toda la tarjeta sea clickeable excepto el botón
+    card.style.cursor = 'pointer';
+    
     // Crear imagen con placeholder mientras carga
     const img = document.createElement('img');
     img.className = 'product-image';
@@ -327,13 +330,24 @@ function createProductCard(product) {
             <span class="product-price">${priceFormatted}</span>
             <span class="product-stock ${stockStatus}"><i class="fas fa-box"></i> ${stockText}</span>
         </div>
-        <button class="btn-add-cart" onclick="addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
+        <a href="detalle-producto.html?id=${product.id}" class="btn" style="display: block; text-align: center; margin-bottom: 0.5rem; text-decoration: none; background: var(--gradient-1);">
+            <i class="fas fa-eye"></i> Ver Detalles
+        </a>
+        <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
             <i class="fas fa-shopping-cart"></i> ${stock === 0 ? 'Agotado' : 'Agregar al carrito'}
         </button>
     `;
     
     card.appendChild(img);
     card.appendChild(productInfo);
+    
+    // Click en toda la tarjeta lleva al detalle (excepto en botones)
+    card.addEventListener('click', (e) => {
+        // No navegar si se hizo click en un botón o link
+        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A' && !e.target.closest('button') && !e.target.closest('a')) {
+            window.location.href = `detalle-producto.html?id=${product.id}`;
+        }
+    });
     
     return card;
 }
