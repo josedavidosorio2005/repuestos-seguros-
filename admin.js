@@ -355,17 +355,8 @@ function updateStatistics() {
 }
 
 function getCategoryName(category) {
-    const names = {
-        'motor': 'Motor',
-        'frenos': 'Frenos',
-        'suspension': 'Suspensión',
-        'transmision': 'Transmisión',
-        'electrico': 'Sistema Eléctrico',
-        'carroceria': 'Carrocería',
-        'escape': 'Escape',
-        'accesorios': 'Accesorios'
-    };
-    return names[category] || category;
+    // Ahora las categorías son directamente las marcas
+    return category || 'Sin categoría';
 }
 
 // ===== MODAL =====

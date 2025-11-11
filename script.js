@@ -136,16 +136,18 @@ function loadAllProducts(filterCategory = null, searchTerm = '') {
     
     let filteredProducts = data.products;
     
-    // Filtrar por categoría
+    // Filtrar por categoría (ahora son marcas)
     if (filterCategory) {
-        filteredProducts = filteredProducts.filter(p => p.category === parseInt(filterCategory));
+        filteredProducts = filteredProducts.filter(p => p.category === filterCategory);
     }
     
     // Filtrar por búsqueda
     if (searchTerm) {
         filteredProducts = filteredProducts.filter(p => 
             p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.description.toLowerCase().includes(searchTerm.toLowerCase())
+            p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()))
         );
     }
     
@@ -172,13 +174,17 @@ function setupFilters() {
     const categoryFilter = document.getElementById('categoryFilter');
     const searchInput = document.getElementById('searchInput');
     
-    // Cargar categorías en filtros
+    // Cargar categorías en filtros (ahora son marcas)
     if (categoryFilter && data) {
-        categoryFilter.innerHTML = '<option value="">Todas las categorías</option>';
-        data.categories.forEach(cat => {
+        categoryFilter.innerHTML = '<option value="">Todas las marcas</option>';
+        
+        // Obtener marcas únicas de los productos
+        const brands = [...new Set(data.products.map(p => p.category))].sort();
+        
+        brands.forEach(brand => {
             const option = document.createElement('option');
-            option.value = cat.id;
-            option.textContent = cat.name;
+            option.value = brand;
+            option.textContent = brand;
             categoryFilter.appendChild(option);
         });
         
