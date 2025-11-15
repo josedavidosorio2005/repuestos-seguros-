@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comercio de Autopartes - Motocicletas</title>
+    <title>Sistema de Verificación de Autopartes - Motocicletas</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -18,14 +18,9 @@
             <nav class="nav">
                 <ul>
                     <li><a href="index.html" class="active">Inicio</a></li>
-                    <li><a href="productos.html">Productos</a></li>
                     <li><a href="reporte-robo.html">Reportar Robo</a></li>
                     <li><a href="verificar-qr.html">Verificar QR</a></li>
                     <li><a href="contacto.html">Contacto</a></li>
-                    <li><a href="carrito.html" class="cart-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-count">0</span>
-                    </a></li>
                 </ul>
             </nav>
             <button class="menu-toggle" id="menuToggle">
@@ -37,10 +32,10 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h2>Comercio de Autopartes</h2>
-            <h3>Hurtadas de Motocicletas</h3>
-            <p class="subtitle">Prototipo</p>
-            <a href="productos.html" class="btn-primary">Ver Productos</a>
+            <h2>Sistema de Verificación</h2>
+            <h3>Autopartes de Motocicletas</h3>
+            <p class="subtitle">Verifica y reporta autopartes robadas</p>
+            <a href="verificar-qr.html" class="btn-primary">Verificar QR</a>
         </div>
         <div class="hero-decoration">
             <div class="corner top-left"></div>
@@ -77,49 +72,30 @@
         </div>
     </section>
 
-    <!-- Categorías -->
-    <section class="categories">
-        <div class="container">
-            <h2 class="section-title">Categorías Destacadas</h2>
-            <div class="categories-grid" id="categoriesGrid">
-                <!-- Se cargarán dinámicamente con JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Productos Destacados -->
-    <section class="featured-products">
-        <div class="container">
-            <h2 class="section-title">Productos Destacados</h2>
-            <div class="products-grid" id="featuredProducts">
-                <!-- Se cargarán dinámicamente con JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Características -->
+    <!-- Características del Sistema -->
     <section class="features">
         <div class="container">
+            <h2 class="section-title">Funciones del Sistema</h2>
             <div class="features-grid">
                 <div class="feature-card">
-                    <i class="fas fa-shipping-fast"></i>
-                    <h3>Envío Rápido</h3>
-                    <p>Entrega en 24-48 horas</p>
+                    <i class="fas fa-qrcode"></i>
+                    <h3>Verificación QR</h3>
+                    <p>Escanea y verifica autopartes al instante</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Reportar Robo</h3>
+                    <p>Reporta partes robadas de forma rápida</p>
                 </div>
                 <div class="feature-card">
                     <i class="fas fa-shield-alt"></i>
-                    <h3>Garantía</h3>
-                    <p>30 días de garantía</p>
+                    <h3>Base de Datos</h3>
+                    <p>Consulta permanente de registros</p>
                 </div>
                 <div class="feature-card">
-                    <i class="fas fa-headset"></i>
-                    <h3>Soporte</h3>
-                    <p>Atención 24/7</p>
-                </div>
-                <div class="feature-card">
-                    <i class="fas fa-credit-card"></i>
-                    <h3>Pago Seguro</h3>
-                    <p>Múltiples métodos de pago</p>
+                    <i class="fas fa-search"></i>
+                    <h3>Búsqueda Rápida</h3>
+                    <p>Encuentra información al instante</p>
                 </div>
             </div>
         </div>
@@ -130,8 +106,8 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>AutoPartes Moto</h3>
-                    <p>Tu tienda de confianza para repuestos de motocicletas</p>
+                    <h3>Sistema Anti-Robo</h3>
+                    <p>Plataforma de verificación y reporte de autopartes robadas</p>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
@@ -171,8 +147,6 @@
         </div>
     </footer>
 
-    <!-- Inicializar productos si no existen -->
-    <script src="init-products.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

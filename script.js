@@ -1,870 +1,263 @@
-// ===== Variables Globales =====
-let data = null;
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+// Sistema de Verificación de Autopartes - Sin funciones de e-commerce
 
-// ===== Inicialización =====
+// Estado global de la aplicación
+let data = {
+    stolenParts: JSON.parse(localStorage.getItem('stolenParts')) || []
+};
+
+// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', async () => {
+    // Cargar datos
     await loadData();
-    initializeApp();
-    updateCartCount();
+    
+    // Inicializar menú móvil
+    initMobileMenu();
+    
+    // Inicializar según la página actual
+    const currentPage = window.location.pathname.split('/').pop();
+    
+    if (currentPage === 'index.html' || currentPage === '') {
+        initHomePage();
+    } else if (currentPage === 'reporte-robo.html') {
+        initReportPage();
+    } else if (currentPage === 'verificar-qr.html') {
+        initVerifyPage();
+    } else if (currentPage === 'contacto.html') {
+        initContactPage();
+    }
 });
 
-// Escuchar cuando init-products.js cargue los productos
-window.addEventListener('productsLoaded', async () => {
-    console.log('🔄 Recargando datos después de inicialización de productos...');
-    await loadData();
-    initializeApp();
-});
-
-// ===== Carga de Datos desde JSON =====
+// Cargar datos del sistema
 async function loadData() {
     try {
-        // Cargar productos desde localStorage
-        const localProducts = localStorage.getItem('products');
+        // Cargar partes robadas desde localStorage
+        const localStolenParts = localStorage.getItem('stolenParts');
         
-        if (localProducts) {
-            // Usar productos del localStorage
-            data = {
-                products: JSON.parse(localProducts),
-                categories: [] // Ya no usamos categories, ahora son marcas
-            };
-            console.log('✅ Datos cargados desde localStorage:', data.products.length, 'productos');
+        if (localStolenParts) {
+            data.stolenParts = JSON.parse(localStolenParts);
+            console.log('✅ Datos cargados:', data.stolenParts.length, 'partes robadas registradas');
         } else {
-            // Si no hay productos en localStorage, mostrar mensaje
-            console.warn('⚠️ No hay productos en localStorage. Espera a que init-products.js los cargue.');
-            data = {
-                products: [],
-                categories: []
-            };
+            console.log('ℹ️ No hay partes robadas registradas');
         }
     } catch (error) {
         console.error('❌ Error al cargar datos:', error);
-        data = {
-            products: [],
-            categories: []
-        };
     }
 }
 
-// ===== Inicialización de la Aplicación =====
-function initializeApp() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-    // Menú móvil
+// Inicializar menú móvil
+function initMobileMenu() {
     const menuToggle = document.getElementById('menuToggle');
-    if (menuToggle) {
-        menuToggle.addEventListener('click', toggleMobileMenu);
-    }
-
-    // Inicializar según la página
-    if (currentPage === 'index.html' || currentPage === '') {
-        initHomePage();
-    } else if (currentPage === 'productos.html') {
-        initProductsPage();
-    } else if (currentPage === 'contacto.html') {
-        initContactPage();
-    } else if (currentPage === 'carrito.html') {
-        initCartPage();
+    const nav = document.querySelector('.nav');
+    
+    if (menuToggle && nav) {
+        menuToggle.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            if (nav.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
     }
 }
 
-// ===== Página de Inicio =====
+// Inicializar página de inicio
 function initHomePage() {
-    loadCategories();
-    loadFeaturedProducts();
-    loadFooterCategories();
+    console.log('✅ Página de inicio inicializada');
 }
 
-// Cargar categorías (ahora son marcas)
-function loadCategories() {
-    const categoriesGrid = document.getElementById('categoriesGrid');
-    if (!categoriesGrid || !data || !data.products) return;
-
-    categoriesGrid.innerHTML = '';
-    
-    // Obtener marcas únicas de los productos
-    const brands = [...new Set(data.products.map(p => p.category))].filter(Boolean).sort();
-    
-    // Iconos para cada marca
-    const brandIcons = {
-        'Yamaha': 'fas fa-motorcycle',
-        'Honda': 'fas fa-motorcycle',
-        'Suzuki': 'fas fa-motorcycle',
-        'Kawasaki': 'fas fa-motorcycle',
-        'KTM': 'fas fa-motorcycle',
-        'Bajaj': 'fas fa-motorcycle',
-        'TVS': 'fas fa-motorcycle',
-        'AKT': 'fas fa-motorcycle',
-        'Universal': 'fas fa-cog',
-        'Accesorios': 'fas fa-helmet-safety'
-    };
-    
-    brands.forEach(brand => {
-        const productCount = data.products.filter(p => p.category === brand).length;
-        const categoryCard = document.createElement('div');
-        categoryCard.className = 'category-card fade-in';
-        categoryCard.innerHTML = `
-            <i class="${brandIcons[brand] || 'fas fa-box'}"></i>
-            <h3>${brand}</h3>
-            <p>${productCount} producto${productCount !== 1 ? 's' : ''} disponible${productCount !== 1 ? 's' : ''}</p>
-        `;
-        categoryCard.addEventListener('click', () => {
-            window.location.href = `productos.html?category=${encodeURIComponent(brand)}`;
-        });
-        categoriesGrid.appendChild(categoryCard);
-    });
-}
-
-// Cargar productos destacados
-function loadFeaturedProducts() {
-    const featuredProducts = document.getElementById('featuredProducts');
-    if (!featuredProducts) return;
-    
-    // Si no hay datos aún, mostrar mensaje de carga
-    if (!data || !data.products || data.products.length === 0) {
-        featuredProducts.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
-                <p style="color: var(--text-secondary);">Cargando productos destacados...</p>
-            </div>
-        `;
-        return;
-    }
-
-    featuredProducts.innerHTML = '';
-    
-    // Mostrar productos destacados o los primeros 6 si no hay destacados
-    let featured = data.products.filter(p => p.featured);
-    if (featured.length === 0) {
-        // Si no hay productos destacados, mostrar los primeros 6
-        featured = data.products.slice(0, 6);
-    } else {
-        featured = featured.slice(0, 6);
-    }
-    
-    featured.forEach(product => {
-        const productCard = createProductCard(product);
-        featuredProducts.appendChild(productCard);
-    });
-}
-
-// Cargar categorías en el footer (ahora marcas)
-function loadFooterCategories() {
-    const footerCategories = document.getElementById('footerCategories');
-    if (!footerCategories || !data || !data.products) return;
-
-    footerCategories.innerHTML = '';
-    
-    // Obtener las primeras 4 marcas únicas
-    const brands = [...new Set(data.products.map(p => p.category))].filter(Boolean).sort().slice(0, 4);
-    
-    brands.forEach(brand => {
-        const li = document.createElement('li');
-        li.innerHTML = `<a href="productos.html?category=${encodeURIComponent(brand)}">${brand}</a>`;
-        footerCategories.appendChild(li);
-    });
-}
-
-// ===== Página de Productos =====
-function initProductsPage() {
-    // Pequeño retraso para asegurar que los productos están cargados
-    setTimeout(() => {
-        setupFilters();
-        loadAllProducts();
-        loadFooterCategories();
-    }, 100);
-}
-
-// Cargar todos los productos
-function loadAllProducts(filterCategory = null, searchTerm = '') {
-    const productsGrid = document.getElementById('productsGrid');
-    if (!productsGrid) return;
-    
-    // Verificar si hay datos
-    if (!data || !data.products || data.products.length === 0) {
-        productsGrid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
-                <i class="fas fa-box-open" style="font-size: 5rem; color: var(--text-secondary); opacity: 0.3; margin-bottom: 1rem;"></i>
-                <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Cargando catálogo...</h3>
-                <p style="color: var(--text-secondary);">Espera un momento mientras cargamos los productos</p>
-                <div style="margin-top: 2rem;">
-                    <div class="loading-spinner" style="border: 3px solid rgba(0, 212, 255, 0.1); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-                </div>
-            </div>
-        `;
-        return;
-    }
-
-    productsGrid.innerHTML = '';
-    
-    let filteredProducts = data.products;
-    
-    // Filtrar por categoría (ahora son marcas)
-    if (filterCategory) {
-        filteredProducts = filteredProducts.filter(p => p.category === filterCategory);
-    }
-    
-    // Filtrar por búsqueda
-    if (searchTerm) {
-        filteredProducts = filteredProducts.filter(p => 
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-    }
-    
-    // Mostrar productos
-    if (filteredProducts.length === 0) {
-        productsGrid.innerHTML = `
-            <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
-                <i class="fas fa-search" style="font-size: 4rem; color: var(--text-secondary); opacity: 0.3; margin-bottom: 1rem;"></i>
-                <h3 style="color: var(--primary-color); margin-bottom: 0.5rem;">No se encontraron productos</h3>
-                <p style="color: var(--text-secondary);">Intenta con otros filtros o términos de búsqueda</p>
-            </div>
-        `;
-        return;
-    }
-    
-    filteredProducts.forEach(product => {
-        const productCard = createProductCard(product);
-        productsGrid.appendChild(productCard);
-    });
-}
-
-// Configurar filtros
-function setupFilters() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const searchInput = document.getElementById('searchInput');
-    
-    // Cargar categorías en filtros (ahora son marcas)
-    if (categoryFilter && data) {
-        categoryFilter.innerHTML = '<option value="">Todas las marcas</option>';
-        
-        // Obtener marcas únicas de los productos
-        const brands = [...new Set(data.products.map(p => p.category))].sort();
-        
-        brands.forEach(brand => {
-            const option = document.createElement('option');
-            option.value = brand;
-            option.textContent = brand;
-            categoryFilter.appendChild(option);
-        });
-        
-        // Verificar parámetro de URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoryParam = urlParams.get('category');
-        if (categoryParam) {
-            categoryFilter.value = categoryParam;
-        }
-        
-        categoryFilter.addEventListener('change', applyFilters);
-    }
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', applyFilters);
-    }
-    
-    // Aplicar filtros iniciales
-    applyFilters();
-}
-
-// Aplicar filtros
-function applyFilters() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const searchInput = document.getElementById('searchInput');
-    
-    const category = categoryFilter ? categoryFilter.value : null;
-    const search = searchInput ? searchInput.value : '';
-    
-    loadAllProducts(category, search);
-}
-
-// ===== Crear Tarjeta de Producto =====
-function createProductCard(product) {
-    const card = document.createElement('div');
-    card.className = 'product-card fade-in';
-    
-    // Manejar productos del admin (sin stock) y del data.json (con stock)
-    const stock = product.stock !== undefined ? product.stock : 10; // Default 10 si no está definido
-    const stockStatus = stock > 5 ? 'in-stock' : stock > 0 ? 'low-stock' : 'out-stock';
-    const stockText = stock > 5 ? 'En stock' : stock > 0 ? `Solo ${stock} disponibles` : 'Agotado';
-    
-    const description = product.description || 'Producto de calidad para tu motocicleta';
-    const condition = product.condition || 'Nuevo';
-    const year = product.year || '2024';
-    const brand = product.brand || '';
-    const currency = product.currency || 'COP';
-    
-    // Formatear precio según moneda
-    let priceFormatted;
-    if (currency === 'COP') {
-        priceFormatted = `$${parseFloat(product.price).toLocaleString('es-CO', {minimumFractionDigits: 0, maximumFractionDigits: 0})} COP`;
-    } else {
-        priceFormatted = `${currency}${parseFloat(product.price).toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-    }
-    
-    // Hacer que toda la tarjeta sea clickeable excepto el botón
-    card.style.cursor = 'pointer';
-    
-    // Crear imagen con placeholder mientras carga
-    const img = document.createElement('img');
-    img.className = 'product-image';
-    img.alt = product.name;
-    img.loading = 'lazy'; // Carga diferida
-    img.src = product.image;
-    img.onerror = function() {
-        this.src = 'https://via.placeholder.com/300x250/1a1a2e/00d4ff?text=Imagen+No+Disponible';
-    };
-    
-    const productInfo = document.createElement('div');
-    productInfo.className = 'product-info';
-    productInfo.innerHTML = `
-        <h3 class="product-name">${product.name}</h3>
-        <p class="product-description">${description}</p>
-        <div class="product-meta">
-            ${brand ? `<span class="product-badge"><i class="fas fa-tag"></i> ${brand}</span>` : ''}
-            <span class="product-badge"><i class="fas fa-check-circle"></i> ${condition}</span>
-            <span class="product-badge"><i class="fas fa-calendar"></i> ${year}</span>
-        </div>
-        <div class="product-details">
-            <span class="product-price">${priceFormatted}</span>
-            <span class="product-stock ${stockStatus}"><i class="fas fa-box"></i> ${stockText}</span>
-        </div>
-        <a href="detalle-producto.html?id=${product.id}" class="btn" style="display: block; text-align: center; margin-bottom: 0.5rem; text-decoration: none; background: var(--gradient-1);">
-            <i class="fas fa-eye"></i> Ver Detalles
-        </a>
-        <button class="btn-add-cart" onclick="event.stopPropagation(); addToCart(${product.id})" ${stock === 0 ? 'disabled' : ''}>
-            <i class="fas fa-shopping-cart"></i> ${stock === 0 ? 'Agotado' : 'Agregar al carrito'}
-        </button>
-    `;
-    
-    card.appendChild(img);
-    card.appendChild(productInfo);
-    
-    // Click en toda la tarjeta lleva al detalle (excepto en botones)
-    card.addEventListener('click', (e) => {
-        // No navegar si se hizo click en un botón o link
-        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A' && !e.target.closest('button') && !e.target.closest('a')) {
-            window.location.href = `detalle-producto.html?id=${product.id}`;
-        }
-    });
-    
-    return card;
-}
-
-// ===== Carrito de Compras =====
-function addToCart(productId) {
-    const product = data.products.find(p => p.id === productId);
-    if (!product) return;
-    
-    const cartItem = cart.find(item => item.id === productId);
-    
-    if (cartItem) {
-        if (cartItem.quantity < product.stock) {
-            cartItem.quantity++;
-        } else {
-            showNotification('No hay más stock disponible', 'warning');
-            return;
-        }
-    } else {
-        cart.push({
-            id: product.id,
-            quantity: 1
-        });
-    }
-    
-    saveCart();
-    updateCartCount();
-    showNotification('Producto agregado al carrito', 'success');
-}
-
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    saveCart();
-    updateCartCount();
-    
-    if (window.location.pathname.includes('carrito.html')) {
-        initCartPage();
+// Inicializar página de reportar robo
+function initReportPage() {
+    const form = document.getElementById('reportForm');
+    if (form) {
+        form.addEventListener('submit', handleReportSubmit);
     }
 }
 
-function updateQuantity(productId, change) {
-    const cartItem = cart.find(item => item.id === productId);
-    if (!cartItem) return;
-    
-    const product = data.products.find(p => p.id === productId);
-    const newQuantity = cartItem.quantity + change;
-    
-    if (newQuantity < 1) {
-        removeFromCart(productId);
-        return;
-    }
-    
-    if (newQuantity > product.stock) {
-        showNotification('No hay más stock disponible', 'warning');
-        return;
-    }
-    
-    cartItem.quantity = newQuantity;
-    saveCart();
-    initCartPage();
-}
-
-function saveCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
-}
-
-function updateCartCount() {
-    const cartCount = document.querySelector('.cart-count');
-    if (cartCount) {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        cartCount.textContent = totalItems;
-    }
-}
-
-// ===== Página del Carrito =====
-function initCartPage() {
-    if (!data) return;
-    
-    const cartItemsContainer = document.getElementById('cartItems');
-    const cartSummary = document.getElementById('cartSummary');
-    
-    if (!cartItemsContainer) return;
-    
-    cartItemsContainer.innerHTML = '';
-    
-    if (cart.length === 0) {
-        cartItemsContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-shopping-cart"></i>
-                <h3>Tu carrito está vacío</h3>
-                <p>Agrega productos para comenzar tu compra</p>
-                <a href="productos.html" class="btn-primary">Ver Productos</a>
-            </div>
-        `;
-        if (cartSummary) cartSummary.style.display = 'none';
-        return;
-    }
-    
-    let subtotal = 0;
-    
-    cart.forEach(item => {
-        const product = data.products.find(p => p.id === item.id);
-        if (!product) return;
-        
-        const itemTotal = product.price * item.quantity;
-        subtotal += itemTotal;
-        
-        const currency = product.currency || 'COP';
-        const pricePerUnit = currency === 'COP' 
-            ? `$${product.price.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP`
-            : `${currency}${product.price.toLocaleString()}`;
-        const itemTotalFormatted = currency === 'COP'
-            ? `$${itemTotal.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP`
-            : `${currency}${itemTotal.toLocaleString()}`;
-        
-        const cartItem = document.createElement('div');
-        cartItem.className = 'cart-item fade-in';
-        cartItem.innerHTML = `
-            <img src="${product.image}" alt="${product.name}" class="cart-item-image">
-            <div class="cart-item-info">
-                <h3 class="cart-item-name">${product.name}</h3>
-                <p>${product.brand || ''} ${product.condition || 'Nuevo'} - ${product.year || '2024'}</p>
-                <p class="cart-item-price">${pricePerUnit} c/u</p>
-            </div>
-            <div class="cart-item-controls">
-                <div class="quantity-controls">
-                    <button class="quantity-btn" onclick="updateQuantity(${product.id}, -1)">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <span class="quantity-display">${item.quantity}</span>
-                    <button class="quantity-btn" onclick="updateQuantity(${product.id}, 1)">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-                <button class="btn-remove" onclick="removeFromCart(${product.id})">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            </div>
-            <div class="cart-item-total">
-                <strong>${itemTotalFormatted}</strong>
-            </div>
-        `;
-        cartItemsContainer.appendChild(cartItem);
-    });
-    
-    // Actualizar resumen en pesos colombianos
-    if (cartSummary) {
-        const tax = subtotal * 0.19; // 19% IVA Colombia
-        const shipping = subtotal > 50000 ? 0 : 15000; // Envío gratis sobre $50.000
-        const total = subtotal + tax + shipping;
-        
-        cartSummary.innerHTML = `
-            <h3>Resumen del Pedido</h3>
-            <div class="summary-line">
-                <span>Subtotal:</span>
-                <span>$${subtotal.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP</span>
-            </div>
-            <div class="summary-line">
-                <span>IVA (19%):</span>
-                <span>$${tax.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP</span>
-            </div>
-            <div class="summary-line">
-                <span>Envío:</span>
-                <span>${shipping === 0 ? '¡Gratis!' : '$' + shipping.toLocaleString('es-CO') + ' COP'}</span>
-            </div>
-            <div class="summary-line summary-total">
-                <span><strong>Total:</strong></span>
-                <span><strong>$${total.toLocaleString('es-CO', {minimumFractionDigits: 0})} COP</strong></span>
-            </div>
-            <button class="btn-primary" onclick="checkout()">
-                <i class="fas fa-credit-card"></i> Proceder al Pago
-            </button>
-            <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.85rem;">
-                <i class="fas fa-truck"></i> Envío gratis en compras superiores a $50.000 COP
-            </p>
-        `;
-    }
-    
-    loadFooterCategories();
-}
-
-function checkout() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    
-    if (cart.length === 0) {
-        showNotification('El carrito está vacío', 'warning');
-        return;
-    }
-    
-    // Generar información de la compra
-    const purchaseId = 'VTA-' + Date.now();
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const iva = total * 0.19;
-    const totalWithIva = total + iva;
-    
-    const purchaseData = {
-        id: purchaseId,
-        date: new Date().toISOString(),
-        items: cart,
-        subtotal: total,
-        iva: iva,
-        total: totalWithIva
-    };
-    
-    // Mostrar modal con QR
-    showPurchaseQRModal(purchaseData);
-    
-    // Vaciar carrito
-    localStorage.setItem('cart', JSON.stringify([]));
-    updateCartCount();
-    loadCartItems();
-}
-
-function showPurchaseQRModal(purchaseData) {
-    // Crear modal
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.95);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: fadeIn 0.3s ease;
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.3);
-            border: 2px solid #00d4ff;
-            text-align: center;
-            position: relative;
-            animation: slideInUp 0.4s ease;
-        ">
-            <button onclick="this.closest('.qr-modal').remove()" style="
-                position: absolute;
-                top: 1rem;
-                right: 1rem;
-                background: transparent;
-                border: none;
-                color: #00d4ff;
-                font-size: 2rem;
-                cursor: pointer;
-                transition: transform 0.3s;
-            " onmouseover="this.style.transform='rotate(90deg)'" onmouseout="this.style.transform='rotate(0deg)'">
-                <i class="fas fa-times"></i>
-            </button>
-            
-            <div style="margin-bottom: 1.5rem;">
-                <i class="fas fa-check-circle" style="font-size: 4rem; color: #00ff88; margin-bottom: 1rem;"></i>
-                <h2 style="color: #00d4ff; margin: 0; font-size: 2rem;">¡Compra Exitosa!</h2>
-                <p style="color: #888; margin-top: 0.5rem;">Venta ID: ${purchaseData.id}</p>
-            </div>
-            
-            <div style="
-                background: white;
-                padding: 1.5rem;
-                border-radius: 15px;
-                margin: 1.5rem auto;
-                display: inline-block;
-            ">
-                <div id="qrCodePurchase"></div>
-            </div>
-            
-            <div style="
-                background: rgba(0, 212, 255, 0.1);
-                border: 1px solid #00d4ff;
-                border-radius: 10px;
-                padding: 1rem;
-                margin: 1.5rem 0;
-                text-align: left;
-            ">
-                <h3 style="color: #00d4ff; margin-top: 0; font-size: 1.2rem;">
-                    <i class="fas fa-receipt"></i> Resumen de Compra
-                </h3>
-                <div style="color: #ddd; line-height: 1.8;">
-                    <p><strong>Productos:</strong> ${purchaseData.items.length}</p>
-                    <p><strong>Subtotal:</strong> ${formatPrice(purchaseData.subtotal)}</p>
-                    <p><strong>IVA (19%):</strong> ${formatPrice(purchaseData.iva)}</p>
-                    <p style="font-size: 1.3rem; color: #00ff88; margin-top: 0.5rem;">
-                        <strong>Total:</strong> ${formatPrice(purchaseData.total)}
-                    </p>
-                </div>
-            </div>
-            
-            <div style="
-                display: flex;
-                gap: 1rem;
-                justify-content: center;
-                margin-top: 1.5rem;
-            ">
-                <button onclick="downloadQRPurchase()" class="btn-primary" style="
-                    padding: 0.8rem 1.5rem;
-                    background: linear-gradient(135deg, #00d4ff, #0099ff);
-                    border: none;
-                    border-radius: 10px;
-                    color: #1a1a2e;
-                    font-weight: bold;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                ">
-                    <i class="fas fa-download"></i>
-                    Descargar QR
-                </button>
-                
-                <button onclick="this.closest('.qr-modal').remove(); window.location.href='productos.html'" class="btn-secondary" style="
-                    padding: 0.8rem 1.5rem;
-                    background: rgba(255, 255, 255, 0.1);
-                    border: 2px solid #00d4ff;
-                    border-radius: 10px;
-                    color: #00d4ff;
-                    font-weight: bold;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                ">
-                    <i class="fas fa-shopping-bag"></i>
-                    Seguir Comprando
-                </button>
-            </div>
-            
-            <p style="
-                margin-top: 1.5rem;
-                color: #888;
-                font-size: 0.9rem;
-            ">
-                <i class="fas fa-info-circle"></i>
-                Guarda este código QR como comprobante de compra
-            </p>
-        </div>
-    `;
-    
-    modal.className = 'qr-modal';
-    document.body.appendChild(modal);
-    
-    // Generar código QR
-    setTimeout(() => {
-        if (typeof QRCode !== 'undefined') {
-            const qrCode = new QRCode(document.getElementById('qrCodePurchase'), {
-                text: JSON.stringify(purchaseData),
-                width: 200,
-                height: 200,
-                colorDark: '#1a1a2e',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-            
-            window.currentPurchaseQR = document.getElementById('qrCodePurchase');
-        } else {
-            document.getElementById('qrCodePurchase').innerHTML = `
-                <p style="color: #ff3366; padding: 2rem;">
-                    Error al generar código QR
-                </p>
-            `;
-        }
-    }, 100);
-}
-
-function downloadQRPurchase() {
-    const qrCanvas = document.querySelector('#qrCodePurchase canvas');
-    if (qrCanvas) {
-        const link = document.createElement('a');
-        link.download = `compra-${Date.now()}.png`;
-        link.href = qrCanvas.toDataURL();
-        link.click();
-        showNotification('QR descargado correctamente', 'success');
-    }
-}
-
-// ===== Página de Contacto =====
-function initContactPage() {
-    const contactForm = document.getElementById('contactForm');
-    
-    if (contactForm) {
-        contactForm.addEventListener('submit', handleContactSubmit);
-    }
-    
-    loadFooterCategories();
-}
-
-function handleContactSubmit(e) {
+// Manejar envío de reporte de robo
+async function handleReportSubmit(e) {
     e.preventDefault();
     
-    const formData = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        subject: document.getElementById('subject').value,
-        message: document.getElementById('message').value
+    const formData = new FormData(e.target);
+    const reportData = {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        partType: formData.get('partType'),
+        brand: formData.get('brand'),
+        model: formData.get('model'),
+        serial: formData.get('serial'),
+        description: formData.get('description'),
+        reporterName: formData.get('reporterName'),
+        reporterContact: formData.get('reporterContact'),
+        qrCode: generateQRData(formData)
     };
     
-    console.log('Formulario enviado:', formData);
-    showNotification('Mensaje enviado correctamente. Te contactaremos pronto.', 'success');
+    // Guardar en localStorage
+    data.stolenParts.push(reportData);
+    localStorage.setItem('stolenParts', JSON.stringify(data.stolenParts));
     
+    // Mostrar mensaje de éxito
+    showNotification('✅ Reporte enviado exitosamente. Se ha generado un código QR.', 'success');
+    
+    // Limpiar formulario
+    e.target.reset();
+    
+    // Mostrar QR (si hay librería QR disponible)
+    if (typeof QRCode !== 'undefined') {
+        displayQRCode(reportData.qrCode);
+    }
+}
+
+// Generar datos para QR
+function generateQRData(formData) {
+    return JSON.stringify({
+        type: 'stolen_part',
+        partType: formData.get('partType'),
+        brand: formData.get('brand'),
+        model: formData.get('model'),
+        serial: formData.get('serial'),
+        timestamp: Date.now()
+    });
+}
+
+// Mostrar código QR
+function displayQRCode(qrData) {
+    // Implementar con librería QRCode.js si está disponible
+    console.log('QR Data:', qrData);
+}
+
+// Inicializar página de verificación
+function initVerifyPage() {
+    const scanBtn = document.getElementById('startScan');
+    const manualBtn = document.getElementById('manualCheck');
+    
+    if (scanBtn) {
+        scanBtn.addEventListener('click', startQRScan);
+    }
+    
+    if (manualBtn) {
+        manualBtn.addEventListener('click', showManualCheckForm);
+    }
+}
+
+// Iniciar escaneo de QR
+async function startQRScan() {
+    // Implementar escaneo con Html5Qrcode si está disponible
+    if (typeof Html5Qrcode !== 'undefined') {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        
+        try {
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess,
+                onScanError
+            );
+        } catch (err) {
+            console.error('Error al iniciar cámara:', err);
+            showNotification('❌ No se pudo acceder a la cámara', 'error');
+        }
+    } else {
+        showNotification('⚠️ Librería de escaneo no disponible', 'warning');
+    }
+}
+
+// Callback de escaneo exitoso
+function onScanSuccess(decodedText, decodedResult) {
+    console.log(`Código escaneado: ${decodedText}`, decodedResult);
+    
+    try {
+        const qrData = JSON.parse(decodedText);
+        checkIfStolen(qrData);
+    } catch (e) {
+        showNotification('⚠️ Código QR no válido', 'warning');
+    }
+}
+
+// Callback de error de escaneo
+function onScanError(error) {
+    // No mostrar errores continuos de escaneo
+}
+
+// Verificar si una parte está robada
+function checkIfStolen(qrData) {
+    const isStolen = data.stolenParts.some(part => 
+        part.serial === qrData.serial &&
+        part.brand === qrData.brand &&
+        part.model === qrData.model
+    );
+    
+    if (isStolen) {
+        showNotification('⚠️ ¡ALERTA! Esta parte ha sido reportada como ROBADA', 'error');
+    } else {
+        showNotification('✅ Esta parte NO está reportada como robada', 'success');
+    }
+}
+
+// Mostrar formulario de verificación manual
+function showManualCheckForm() {
+    showNotification('ℹ️ Ingrese los datos para verificación manual', 'info');
+}
+
+// Inicializar página de contacto
+function initContactPage() {
+    const form = document.getElementById('contactForm');
+    if (form) {
+        form.addEventListener('submit', handleContactSubmit);
+    }
+}
+
+// Manejar envío de formulario de contacto
+async function handleContactSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    
+    // Simular envío (en producción, enviar a servidor)
+    console.log('Mensaje de contacto:', {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        message: formData.get('message')
+    });
+    
+    showNotification('✅ Mensaje enviado exitosamente', 'success');
     e.target.reset();
 }
 
-// ===== Menú Móvil =====
-function toggleMobileMenu() {
-    const nav = document.querySelector('.nav');
-    nav.classList.toggle('active');
-}
-
-// ===== Notificaciones =====
+// Mostrar notificación
 function showNotification(message, type = 'info') {
     // Crear elemento de notificación
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
+    notification.textContent = message;
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        padding: 1rem 1.5rem;
-        background: ${type === 'success' ? '#00ff88' : type === 'warning' ? '#ffaa00' : '#00d4ff'};
-        color: #1a1a2e;
+        padding: 1rem 2rem;
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#2196F3'};
+        color: white;
         border-radius: 8px;
-        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         z-index: 10000;
-        animation: slideInRight 0.3s ease;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    `;
-    notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-        ${message}
+        animation: slideIn 0.3s ease;
     `;
     
     document.body.appendChild(notification);
     
+    // Auto-remover después de 3 segundos
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
+        notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-function showError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #ff4444;
-        color: white;
-        padding: 2rem;
-        border-radius: 15px;
-        text-align: center;
-        z-index: 10000;
-        max-width: 500px;
-    `;
-    errorDiv.innerHTML = `
-        <i class="fas fa-exclamation-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-        <h3>Error</h3>
-        <p>${message}</p>
-        <button onclick="location.reload()" class="btn-primary" style="margin-top: 1rem;">
-            Recargar Página
-        </button>
-    `;
-    
-    document.body.appendChild(errorDiv);
-}
-
-// ===== Estilos adicionales para animaciones =====
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-    
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideInUp {
-        from {
-            transform: translateY(50px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-`;
-document.head.appendChild(style);
+// Exportar funciones para uso global
+window.showNotification = showNotification;
+window.checkIfStolen = checkIfStolen;
